@@ -18,5 +18,10 @@
   "homepage": "https://github.com/2023-ECE461-group-10/rest-api#readme",
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.6",
+    "nodemon": "^2.0.21",
+    "typescript": "^4.9.5"
   }
 }
