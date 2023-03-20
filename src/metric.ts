@@ -425,7 +425,6 @@ export class VersionMetric extends Metric {
     async get_metric(repo: Repository):Promise<GroupMetric> {
         let score:number =  0; // subscore for readme
         let packages:any = await repo.get_package_json(); //get the readme
-		
 
         //read me calcs
         if(packages == null){
@@ -433,7 +432,6 @@ export class VersionMetric extends Metric {
             score = 1;
         }
         else{
-			//console.log(packages)
             score = await versionCalc(packages); //calc the readme score
         }
 
@@ -461,9 +459,6 @@ async function versionCalc(packages: any): Promise<number> {
 		totalNumberOfDependencies += Object.keys(packages.optionalDependencies).length;
 	}
 
-	//console.log(packages?.dependencies)
-	
-
 	numberPinnedToMajorMinor += await countPinnedToMajorMinor(packages?.dependencies);
 	numberPinnedToMajorMinor += await countPinnedToMajorMinor(packages?.devDependencies);
 	numberPinnedToMajorMinor += await countPinnedToMajorMinor(packages?.peerDependencies);
@@ -480,14 +475,10 @@ async function countPinnedToMajorMinor(dependencies: any): Promise<number> {
 	const re = /^\d+\.\d+\.(x|X)$/
 
 	for (const dependency in dependencies) {
-		//console.log(dependencies[dependency])
-		console.log(re.test('0.3.x'))
 		if (re.test(dependencies[dependency])) {
 			count++;
 		}
 	}
-
-	//console.log(count)
 
 	return count;
 }
