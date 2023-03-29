@@ -9,6 +9,7 @@ import AuthenticateRoute from './routes/authenticate';
 import ResetRoute from './routes/reset';
 
 import { OpenAPIErrorHandler } from './middleware/error';
+import { AuthMiddleware } from './middleware/auth';
 
 const app = express();
 
@@ -21,6 +22,9 @@ app.use(OpenAPIValidator.middleware(config.openAPIValidatorOpts));
 
 // API ROUTES
 app.use('/authenticate', AuthenticateRoute);
+
+// API ROUTES (AUTH REQUIRED)
+app.use(AuthMiddleware);
 app.use('/package', PackageRoute);
 app.use('/packages', PackagesRoute);
 app.use('/reset', ResetRoute);
