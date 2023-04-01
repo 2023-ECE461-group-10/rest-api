@@ -1,0 +1,35 @@
+name: Run tests
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      UNIT_TESTS_PASSED: false
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run unit tests
+        run: |
+          if npm run test:unit; then
+            echo "Unit tests passed"
+            export UNIT_TESTS_PASSED=true
+          else
+            echo "Unit tests failed"
+            exit 1
+          fi
+
+      - name: Run integration tests
+        if: env.UNIT_TESTS_PASSED == 'true'
+        run: npm run test:integration
