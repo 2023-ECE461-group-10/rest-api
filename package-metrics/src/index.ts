@@ -416,7 +416,7 @@ export function get_weighted_sum(scores:ScoresWithoutNet):ScoresWithNet {
 							correctness_score_disp, responsive_maintainer_score_disp, version_score_disp, net_score);
 }
 
-function calc_final_result(metrics_array:GroupMetric[]):void {
+export function calc_final_result(metrics_array:GroupMetric[]):void {
 	logger.log('info', "\nMetrics array of objects for each metric: \n" + JSON.stringify(metrics_array, null, 4));
 	var scores_map_with_net = new Map<string, ScoresWithNet>();
 	
