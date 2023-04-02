@@ -41,7 +41,6 @@
     "octokit": "^2.0.14",
     "ts-jest": "^28.0.8",
     "ts-node": "^10.9.1",
-    "tsc": "^2.0.4",
     "winston": "^3.8.2"
   },
   "devDependencies": {
