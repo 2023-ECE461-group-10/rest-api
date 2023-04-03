@@ -18,9 +18,9 @@ export function verifyAccessToken(token: string): Promise<AuthTokenData> {
 }
 
 export async function authenticate(user: User, authInfo: UserAuthenticationInfo): Promise<string> {
-    // access database to verify username and password
-    // If success, continue
-    // If not, reject returned promise
+    // Just to make the linter happy (variable not used error)
+    // authInfo will be used later when we verify the password matches the hash in the database
+    authInfo;
 
     const tokenData: AuthTokenData = {
         username: user.name,
