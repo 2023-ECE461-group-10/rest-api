@@ -9,7 +9,8 @@
     "prod": "tsc; dotenv -e .common.env -e .prod.env node dist/index.js",
     "clean": "rm -Rf dist",
     "dev": "tsc; dotenv -e .common.env -e .dev.env node dist/index.js",
-    "test": "jest --coverage --detectOpenHandles --coverageReporters=\"json-summary\" --json --outputFile=\"./coverage/output-final.json\""
+    "test": "jest --coverage --detectOpenHandles --coverageReporters=\"json-summary\" --json --outputFile=\"./coverage/output-final.json\"",
+    "test-ci": "jest --coverage --detectOpenHandles --coverageReporters=\"json-summary\" --json"
   },
   "repository": {
     "type": "git",
@@ -37,6 +38,9 @@
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.1",
     "@types/node": "^18.14.6",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
+    "eslint": "^8.37.0",
     "nodemon": "^2.0.21",
     "typescript": "^4.9.5"
   }

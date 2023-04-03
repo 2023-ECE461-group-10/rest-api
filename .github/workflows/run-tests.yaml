@@ -4,10 +4,8 @@ on:
   pull_request:
 
 jobs:
-  test:
+  test-and-lint:
     runs-on: ubuntu-latest
-    env:
-      UNIT_TESTS_PASSED: false
 
     steps:
       - uses: actions/checkout@v2
@@ -20,5 +18,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run unit tests
-        run: npm run test
+      - name: Run tests
+        run: npm run test-ci
+      
+      - name: Run linter
+        run: npx eslint .
