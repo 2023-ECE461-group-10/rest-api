@@ -9,7 +9,7 @@
     "prod": "tsc; dotenv -e .common.env -e .prod.env node dist/index.js",
     "clean": "rm -Rf dist",
     "dev": "tsc; dotenv -e .common.env -e .dev.env node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --coverage --detectOpenHandles --coverageReporters=\"json-summary\" --json --outputFile=\"./coverage/output-final.json\""
   },
   "repository": {
     "type": "git",
@@ -23,11 +23,16 @@
   "homepage": "https://github.com/2023-ECE461-group-10/rest-api#readme",
   "dependencies": {
     "@types/express": "^4.17.17",
+    "@types/supertest": "^2.0.12",
     "dotenv-cli": "^7.1.0",
     "express": "^4.18.2",
     "express-openapi-validator": "^5.0.3",
     "jest": "^29.5.0",
-    "jsonwebtoken": "^9.0.0"
+    "jsonwebtoken": "^9.0.0",
+    "node-fetch": "^3.3.1",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.1",

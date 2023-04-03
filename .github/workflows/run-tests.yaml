@@ -21,15 +21,4 @@ jobs:
         run: npm install
 
       - name: Run unit tests
-        run: |
-          if npm run test:unit; then
-            echo "Unit tests passed"
-            export UNIT_TESTS_PASSED=true
-          else
-            echo "Unit tests failed"
-            exit 1
-          fi
-
-      - name: Run integration tests
-        if: env.UNIT_TESTS_PASSED == 'true'
-        run: npm run test:integration
+        run: npm run test

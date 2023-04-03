@@ -18,7 +18,7 @@ router.put('/', async (req: Request, res: Response) => {
 
     res.status(200);
     res.setHeader('Content-Type', 'application/json');
-    res.send(token);
+    res.send(JSON.stringify(token));
 });
 
 export = router;
