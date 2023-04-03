@@ -9,8 +9,7 @@
     "prod": "tsc; dotenv -e .common.env -e .prod.env node dist/index.js",
     "clean": "rm -Rf dist",
     "dev": "tsc; dotenv -e .common.env -e .dev.env node dist/index.js",
-    "test": "jest --coverage --detectOpenHandles --coverageReporters=\"json-summary\" --json --outputFile=\"./coverage/output-final.json\"",
-    "test-ci": "jest --coverage --detectOpenHandles --coverageReporters=\"json-summary\" --json"
+    "test": "jest --coverage --detectOpenHandles --coverageReporters=\"json-summary\" --json --outputFile=\"./coverage/output-final.json\""
   },
   "repository": {
     "type": "git",
