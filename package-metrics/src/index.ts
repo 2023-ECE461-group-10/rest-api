@@ -46,7 +46,7 @@ function get_log_file():string {
 	}
 }
 
-async function get_file_lines(filename:string):Promise<string[]> {
+export async function get_file_lines(filename:string):Promise<string[]> {
 	const file = await open(filename);
 	var rv:string[] = [];
 	for await (const line of file.readLines()) {
@@ -236,11 +236,11 @@ class MetricsCollection {
 // https://stackoverflow.com/questions/62320779/typescript-how-to-type-an-array-of-number-or-null-elements-where-the-first-elem
 
 interface calcResults {
-	(metrics_array:GroupMetric[]): void;
+	(metrics_array:GroupMetric[]): OutputObject[];
 }
 
-export async function process_urls(filename:string, callback:calcResults) {
-	var url_vals:string[] = await get_file_lines(filename);
+export async function process_urls(url_vals:string[], callback:calcResults):Promise<OutputObject[]> {
+	//var url_vals:string[] = await get_file_lines(filename);
 	var metrics_array:GroupMetric[]= [];
 	var owner_and_repo:OwnerAndRepo|null;
 	var promises_of_metrics:Promise<GroupMetric>[] = [];
@@ -263,6 +263,7 @@ export async function process_urls(filename:string, callback:calcResults) {
 		}
 	} 
 	const allPromise = Promise.allSettled(promises_of_metrics);
+	var rating:OutputObject[] = [];
 
 	allPromise.then((value) => {
 		logger.log('info', 'Resolved: ' + value);
@@ -285,10 +286,12 @@ export async function process_urls(filename:string, callback:calcResults) {
 		logger.log('error', 'Rejected: ' + error);
 	}).finally(() => {
 		logger.log('info', "Finished get_metrics for all repos");
-		callback(metrics_array);
+		rating = callback(metrics_array);
 		// map with keys as url with values for each metric
 		// calculate net score, sort by net score, print
 	});
+
+	return rating;
 }
 
 type NullNum = number|null;
@@ -331,7 +334,7 @@ export class ScoresWithNet {
 	}
 }
 
-class OutputObject {
+export class OutputObject {
 	URL:string;
 	NET_SCORE:number;
 	RAMP_UP_SCORE:number;
@@ -416,7 +419,7 @@ export function get_weighted_sum(scores:ScoresWithoutNet):ScoresWithNet {
 							correctness_score_disp, responsive_maintainer_score_disp, version_score_disp, net_score);
 }
 
-export function calc_final_result(metrics_array:GroupMetric[]):void {
+export function calc_final_result(metrics_array:GroupMetric[]):OutputObject[] {
 	logger.log('info', "\nMetrics array of objects for each metric: \n" + JSON.stringify(metrics_array, null, 4));
 	var scores_map_with_net = new Map<string, ScoresWithNet>();
 	
@@ -510,6 +513,7 @@ export function calc_final_result(metrics_array:GroupMetric[]):void {
 	logger.log('debug', "Scores map with only net score\n" + scores_map_only_net);
 	let sortedMap = new Map([...scores_map_only_net.entries()].sort((a, b) => b[1] - a[1]));
 	logger.log('debug', "Scores map with only net score sorted \n" + sortedMap);
+	let outputArr:OutputObject[] = [];
 	sortedMap.forEach((value, key, map) => {
 		const curr_url_scores = scores_map_with_net.get(key);
 		if (curr_url_scores != undefined) {
@@ -517,14 +521,17 @@ export function calc_final_result(metrics_array:GroupMetric[]):void {
 			curr_url_scores.ramp_up_score, curr_url_scores.correctness_score,
 			curr_url_scores.bus_factor_score, curr_url_scores.responsive_maintainer_score,
 			curr_url_scores.license_score, curr_url_scores.version_score);
-			console.log(JSON.stringify(output_object));
+			//console.log(JSON.stringify(output_object));
+			outputArr.push(output_object);
 		}
 	});
+
+	return outputArr;
 }
 
 export async function async_main() {
 	const filename:string = process.argv[2];
-	await process_urls(filename, calc_final_result);
+	//await process_urls(filename, calc_final_result);
 }
 
 // MAIN IS AND SHOULD BE JUST THIS, since process_urls is the "asynchronous main"
