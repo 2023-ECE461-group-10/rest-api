@@ -4,4 +4,5 @@ export function OpenAPIErrorHandler(err: any, req: Request, res: Response, next:
     res.status(err.status || 500).json({
       errors: err.errors,
     });
+    next();
 }
