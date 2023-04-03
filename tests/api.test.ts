@@ -1,8 +1,3 @@
-import * as dotenv from 'dotenv';
-import path from 'path';
-dotenv.config({path: path.resolve(__dirname, '../.common.env')});
-dotenv.config({path: path.resolve(__dirname, '../.dev.env')});
-
 import { describe, it, expect } from '@jest/globals';
 import { verifyAccessToken } from '../src/auth';
 import { app } from '../src/server';
