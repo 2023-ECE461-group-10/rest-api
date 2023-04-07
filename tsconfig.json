@@ -13,5 +13,5 @@
       "*": ["node_modules/*"]
     }
   },
-  "include": ["src/**/*", "package-metrics/src/**/*", "package-metrics/tests/**/*"]
+  "include": ["src/**/*", "tests/**/*", "package-metrics/src/**/*", "package-metrics/tests/**/*"]
 }

@@ -9,4 +9,4 @@ export async function AuthMiddleware(req: Request, res: Response, next: NextFunc
     } catch (error) {
         res.status(400).end();
     }
-};
+}

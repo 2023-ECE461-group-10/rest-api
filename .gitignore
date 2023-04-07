@@ -4,3 +4,4 @@ dist
 test
 package-metrics/node_modules
 package-metrics/build
+coverage
