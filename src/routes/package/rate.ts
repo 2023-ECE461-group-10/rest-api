@@ -1,5 +1,5 @@
 import express from 'express';
-import { process_urls, calc_final_result, get_file_lines, OutputObject }  from '../../../package-metrics/src/index';
+import { process_urls, calc_final_result, get_file_lines, OutputObject }  from '../../package-metrics/src/index';
 import { Request, Response } from 'express';
 
 const router = express.Router();

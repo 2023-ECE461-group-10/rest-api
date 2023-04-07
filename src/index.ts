@@ -1,6 +1,6 @@
 import { app } from './server';
 import { createLogger, format, transports } from "winston";
-import { get_log_level, get_log_file } from './../package-metrics/src/index'
+import { get_log_level, get_log_file } from './package-metrics/src/index'
 
 const logger = createLogger({
   level: get_log_level(),
