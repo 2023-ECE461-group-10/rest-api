@@ -18,4 +18,6 @@ const logger = createLogger({
                    ]
 });
 
+global.logger = logger;
+
 app.listen(process.env.PORT, () => console.log(`Running on port ${process.env.PORT}`));
