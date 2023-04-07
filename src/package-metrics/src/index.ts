@@ -263,7 +263,7 @@ export async function process_urls(url_vals:string[], callback:calcResults):Prom
 	const allPromise = Promise.allSettled(promises_of_metrics);
 	var rating:OutputObject[] = [];
 
-	allPromise.then((value) => {
+	await allPromise.then((value) => {
 		logger.log('info', 'Resolved: ' + value);
 		const jdata = JSON.parse(JSON.stringify(value));
 		for (const result of jdata) {
@@ -334,22 +334,24 @@ export class ScoresWithNet {
 
 export class OutputObject {
 	URL:string;
-	NET_SCORE:number;
-	RAMP_UP_SCORE:number;
-	CORRECTNESS_SCORE:number;
-	BUS_FACTOR_SCORE:number;
-	RESPONSIVE_MAINTAINER_SCORE:number;
-	LICENSE_SCORE:number;
-	VERSION_SCORE:number;
+	NetScore:number;
+	RampUp:number;
+	Correctness:number;
+	BusFactor:number;
+	ResponsiveMaintainer:number;
+	LicenseScore:number;
+	GoodPinningPractice:number;
+	PullRequest:number;
 	constructor(url:string, ns:number, ru:number, cs:number, bf:number, rm:number, ls:number, vr:number) {
 		this.URL = url;
-		this.LICENSE_SCORE = ls;
-		this.RAMP_UP_SCORE = ru;
-		this.BUS_FACTOR_SCORE = bf;
-		this.CORRECTNESS_SCORE = cs;
-		this.RESPONSIVE_MAINTAINER_SCORE = rm;
-		this.VERSION_SCORE = vr;
-		this.NET_SCORE = ns;
+		this.LicenseScore = ls;
+		this.RampUp = ru;
+		this.BusFactor = bf;
+		this.Correctness = cs;
+		this.ResponsiveMaintainer = rm;
+		this.GoodPinningPractice = vr;
+		this.PullRequest = 0;
+		this.NetScore = ns;
 	}
 }
 

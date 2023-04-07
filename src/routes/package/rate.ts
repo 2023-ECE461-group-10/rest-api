@@ -8,10 +8,16 @@ router.get('/:id/rate', async (req: Request, res: Response) => {
     //TODO: once we have a database with packages, need to have this get the url associated with the package id,
     //for now it's set up to get the url from a file.
     //await process_urls(filename, calc_final_result);
-    var url_vals:string[] = await get_file_lines('sample_url_file copy.txt');
-    var rating:OutputObject[] = await process_urls(url_vals, calc_final_result);
+    try {
+        //var url_vals:string[] = await get_file_lines('../sample_url_file copy.txt');
+        var rating:OutputObject[] = await process_urls(["https://github.com/nullivex/nodist"], calc_final_result);
+        res.status(200).json(rating[0]);
+    } catch {
+        res.status(500).end();
+    }
+    
 
-    res.status(200).json(rating[0]);
+    
 });
 
 export = router;
