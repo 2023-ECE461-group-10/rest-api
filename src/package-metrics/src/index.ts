@@ -1,8 +1,10 @@
-import { GroupMetric, Metric, LicenseMetric, RampUpMetric, BusFactorMetric, CorrectnessMetric, ResponsiveMetric, VersionMetric } from "./metric"
-import { GithubRepository } from "./github_repository"
-import { Repository } from "./repository"
+import { GroupMetric, Metric, LicenseMetric, RampUpMetric, BusFactorMetric, CorrectnessMetric, ResponsiveMetric, VersionMetric } from "./metric";
+import { GithubRepository } from "./github_repository";
+import { Repository } from "./repository";
+import { exec } from "child_process";
 
 import { open } from 'node:fs/promises';
+import { promisify } from "util";
 
 // read environment variable LOG_LEVEL to set up logging
 export function get_log_level():string {
@@ -288,6 +290,8 @@ export async function process_urls(url_vals:string[], callback:calcResults):Prom
 		// map with keys as url with values for each metric
 		// calculate net score, sort by net score, print
 	});
+
+	await promisify(exec)(`rm -rf downloads/ && rm -rf local_clones`);
 
 	return rating;
 }
