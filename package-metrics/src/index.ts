@@ -1,13 +1,11 @@
-import { createLogger, format, transports } from "winston";
 import { GroupMetric, Metric, LicenseMetric, RampUpMetric, BusFactorMetric, CorrectnessMetric, ResponsiveMetric, VersionMetric } from "./metric"
 import { GithubRepository } from "./github_repository"
 import { Repository } from "./repository"
 
 import { open } from 'node:fs/promises';
-import fs from "fs"
 
 // read environment variable LOG_LEVEL to set up logging
-function get_log_level():string {
+export function get_log_level():string {
 	if (process.env.LOG_LEVEL == undefined) {
 		console.log("LOG_LEVEL undefined, default emerg");
 		return 'emerg';
@@ -31,7 +29,7 @@ function get_log_level():string {
 }
 
 // read environment variable LOG_FILE to set up logging
-function get_log_file():string {
+export function get_log_file():string {
 	if (process.env.LOG_FILE == undefined) {
 		console.log("LOG_FILE undefined, default ./logs/default.log");
 		return './logs/default.log';
@@ -528,39 +526,3 @@ export function calc_final_result(metrics_array:GroupMetric[]):OutputObject[] {
 
 	return outputArr;
 }
-
-export async function async_main() {
-	const filename:string = process.argv[2];
-	//await process_urls(filename, calc_final_result);
-}
-
-// MAIN IS AND SHOULD BE JUST THIS, since process_urls is the "asynchronous main"
-if (require.main === module) {
-	// used example code from winston repo to set up:
-	// https://github.com/winstonjs/winston#usage 
-	const logger = createLogger({
-		level: get_log_level(),
-				format: format.combine(
-					format.timestamp({
-			format: 'YYYY-MM-DD HH:mm:ss'
-		}),
-		format.errors({ stack: true }),
-		format.splat(),
-		format.simple()
-				),
-				defaultMeta: { service: '461 Project 1' },
-				transports: [
-				             new transports.File({ filename: get_log_file(), level: get_log_level() })
-				             ]
-	});
-	
-	// set the global variable logger to be this instance of a winston logger
-	// so that all files can log using logger.log('level', "message");
-	global.logger = logger;
-	try {
-		async_main();
-	} catch (error) {
-		process.exit(1);
-	}
-}
-
