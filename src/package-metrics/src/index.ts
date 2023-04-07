@@ -1,4 +1,4 @@
-import { GroupMetric, Metric, LicenseMetric, RampUpMetric, BusFactorMetric, CorrectnessMetric, ResponsiveMetric, VersionMetric } from "./metric";
+import { GroupMetric, LicenseMetric, RampUpMetric, BusFactorMetric, CorrectnessMetric, ResponsiveMetric, VersionMetric } from "./metric";
 import { GithubRepository } from "./github_repository";
 import { Repository } from "./repository";
 import { exec } from "child_process";
@@ -13,8 +13,8 @@ export function get_log_level():string {
 		return 'emerg';
 	}
 	else {
-		var log_level:string|undefined = process.env.LOG_LEVEL;
-		var int_level:number = parseInt(log_level);
+		const log_level:string|undefined = process.env.LOG_LEVEL;
+		const int_level:number = parseInt(log_level);
 		if (int_level == 0) {
 			return 'emerg';
 		}
@@ -37,7 +37,7 @@ export function get_log_file():string {
 		return './logs/default.log';
 	}
 	else {
-		var log_file:string|undefined = process.env.LOG_FILE;
+		const log_file:string|undefined = process.env.LOG_FILE;
 		if (log_file == "") {
 			console.log("LOG_FILE empty, default ./logs/default.log");
 			return './logs/default.log';
@@ -48,7 +48,7 @@ export function get_log_file():string {
 
 export async function get_file_lines(filename:string):Promise<string[]> {
 	const file = await open(filename);
-	var rv:string[] = [];
+	const rv:string[] = [];
 	for await (const line of file.readLines()) {
 		rv.push(line);
 	}
@@ -72,9 +72,9 @@ export class OwnerAndRepo {
 }
 
 export async function fetch_npm_registry_data(registry_url:string):Promise<string[]> {
-	var url_obj:URL;
-	var git_url:string
-	var owner_repo:string[] = [];
+	let url_obj:URL;
+	let git_url:string
+	let owner_repo:string[] = [];
 	try {
 		url_obj = new URL(registry_url);
 	} catch(error) {
@@ -98,19 +98,19 @@ export async function fetch_npm_registry_data(registry_url:string):Promise<strin
 					reject(owner_repo);
 				});
 			}
-			var hostname:string = url_obj.host;
+			const hostname:string = url_obj.host;
 			if (hostname != "github.com") {
 				logger.log('error', "Repository url from npm registry not on github!");
 				return new Promise((reject) => {
 					reject(owner_repo);
 				});
 			}
-			var pathname:string = url_obj.pathname;
+			let pathname:string = url_obj.pathname;
 			if (pathname.startsWith("/")) {
 				pathname = pathname.slice(1);
 			}
-			var url_owner:string = pathname.slice(0, pathname.indexOf("/"));
-			var url_repo:string = pathname.slice(pathname.indexOf("/") + 1);
+			const url_owner:string = pathname.slice(0, pathname.indexOf("/"));
+			let url_repo:string = pathname.slice(pathname.indexOf("/") + 1);
 			
 			if (url_repo.endsWith(".git")) {
 				url_repo = url_repo.split(".git")[0];
@@ -118,20 +118,20 @@ export async function fetch_npm_registry_data(registry_url:string):Promise<strin
 			owner_repo.push(url_owner);
 			owner_repo.push(url_repo);
 			
-			var protocol:string = git_url.slice(0, git_url.indexOf(":"));
+			const protocol:string = git_url.slice(0, git_url.indexOf(":"));
 			// handle cloning url (form exactly like sample github urls)
 			if (protocol.startsWith("https")) {
 				owner_repo.push(git_url);
 			}
 			else if (protocol.startsWith("git+https")) {
 				// remove git+ from beginning
-				var new_url = git_url.slice(git_url.indexOf("+") + 1);
+				const new_url = git_url.slice(git_url.indexOf("+") + 1);
 				owner_repo.push(new_url);
 				// remove .git from end
 			}
 			else if (protocol.startsWith("git+ssh")) {
 				// remove until :, replace with https:
-				var new_url = "https:" + git_url.slice(git_url.indexOf(":") + 1);
+				let new_url = "https:" + git_url.slice(git_url.indexOf(":") + 1);
 				// remove git@
 				new_url = new_url.replace("git@", "");
 				owner_repo.push(new_url);
@@ -156,7 +156,7 @@ export async function fetch_npm_registry_data(registry_url:string):Promise<strin
 }
 
 export async function get_real_owner_and_repo(url_val:string):Promise<OwnerAndRepo|null> {
-	var url_obj:URL;
+	let url_obj:URL;
 	try {
 		url_obj = new URL(url_val);
 	} catch(error) {
@@ -164,21 +164,21 @@ export async function get_real_owner_and_repo(url_val:string):Promise<OwnerAndRe
 		return null;
 	}
 
-	var host:string = url_obj.host;
-	var pathname:string = url_obj.pathname;
+	const host:string = url_obj.host;
+	let pathname:string = url_obj.pathname;
 	if (host == "github.com") {
 		if (pathname.startsWith("/")) {
 			pathname = pathname.slice(1);
 		}
-		var url_owner:string = pathname.slice(0, pathname.indexOf("/"));
-		var url_repo:string = pathname.slice(pathname.indexOf("/") + 1);
+		const url_owner:string = pathname.slice(0, pathname.indexOf("/"));
+		const url_repo:string = pathname.slice(pathname.indexOf("/") + 1);
 		return new OwnerAndRepo(url_val, url_owner, url_repo, url_val);
 	}
 	else if (host == "www.npmjs.com") {
-		var package_name:string = pathname.slice(pathname.lastIndexOf("/"));
-		var registry_url:string = "https://registry.npmjs.org" + package_name;
+		const package_name:string = pathname.slice(pathname.lastIndexOf("/"));
+		const registry_url:string = "https://registry.npmjs.org" + package_name;
 		try {
-			var owner_and_repo:string[] = [];
+			let owner_and_repo:string[] = [];
 			try {
 				owner_and_repo = await fetch_npm_registry_data(registry_url);
 			} catch (error) {
@@ -220,7 +220,7 @@ class MetricsCollection {
 	}
 
 	async get_metrics():Promise<Promise<GroupMetric>[]> {
-		var promises_of_metrics:Promise<GroupMetric>[] = [];
+		const promises_of_metrics:Promise<GroupMetric>[] = [];
 		promises_of_metrics[0] = this.license_metric.get_metric(this.git_repo);
 		promises_of_metrics[1] = this.ramp_up_metric.get_metric(this.git_repo);
 		promises_of_metrics[2] = this.bus_factor_metric.get_metric(this.git_repo);
@@ -241,17 +241,17 @@ interface calcResults {
 
 export async function process_urls(url_vals:string[], callback:calcResults):Promise<OutputObject[]> {
 	//var url_vals:string[] = await get_file_lines(filename);
-	var metrics_array:GroupMetric[]= [];
-	var owner_and_repo:OwnerAndRepo|null;
-	var promises_of_metrics:Promise<GroupMetric>[] = [];
+	const metrics_array:GroupMetric[]= [];
+	let owner_and_repo:OwnerAndRepo|null;
+	let promises_of_metrics:Promise<GroupMetric>[] = [];
 	for (const url_val of url_vals) {
 		// change this to .then and .catch for error checking
 		owner_and_repo = await get_real_owner_and_repo(url_val);
 		if (owner_and_repo != null) {
 			// var metrics_collection:MetricsCollection = new MetricsCollection(owner_and_repo, new LicenseMetric(), new <NewMetric()>...);
-			var metrics_collection:MetricsCollection = new MetricsCollection(owner_and_repo, new LicenseMetric(), 
+			const metrics_collection:MetricsCollection = new MetricsCollection(owner_and_repo, new LicenseMetric(), 
 			new RampUpMetric(), new BusFactorMetric(), new CorrectnessMetric(), new ResponsiveMetric(), new VersionMetric());
-			var tmp_promises:Promise<GroupMetric>[] = await metrics_collection.get_metrics();
+			const tmp_promises:Promise<GroupMetric>[] = await metrics_collection.get_metrics();
 			promises_of_metrics = promises_of_metrics.concat(tmp_promises);
 		}
 		else {
@@ -263,7 +263,7 @@ export async function process_urls(url_vals:string[], callback:calcResults):Prom
 		}
 	} 
 	const allPromise = Promise.allSettled(promises_of_metrics);
-	var rating:OutputObject[] = [];
+	let rating:OutputObject[] = [];
 
 	await allPromise.then((value) => {
 		logger.log('info', 'Resolved: ' + value);
@@ -360,19 +360,19 @@ export class OutputObject {
 }
 
 export function get_weighted_sum(scores:ScoresWithoutNet):ScoresWithNet {
-	var net_score:number = 0;
-	var license_score_calc:NullNum = scores.license_score;
-	var ramp_up_score_calc:NullNum = scores.ramp_up_score;
-	var bus_factor_score_calc:NullNum = scores.bus_factor_score;
-	var correctness_score_calc:NullNum = scores.correctness_score;
-	var responsive_maintainer_score_calc:NullNum = scores.responsive_maintainer_score;
-	var version_score_calc:NullNum = scores.version_score;
-	var license_score_disp:number;
-	var ramp_up_score_disp:number;
-	var bus_factor_score_disp:number;
-	var correctness_score_disp:number;
-	var responsive_maintainer_score_disp:number;
-	var version_score_disp:number;
+	let net_score = 0;
+	let license_score_calc:NullNum = scores.license_score;
+	let ramp_up_score_calc:NullNum = scores.ramp_up_score;
+	let bus_factor_score_calc:NullNum = scores.bus_factor_score;
+	let correctness_score_calc:NullNum = scores.correctness_score;
+	let responsive_maintainer_score_calc:NullNum = scores.responsive_maintainer_score;
+	let version_score_calc:NullNum = scores.version_score;
+	let license_score_disp:number;
+	let ramp_up_score_disp:number;
+	let bus_factor_score_disp:number;
+	let correctness_score_disp:number;
+	let responsive_maintainer_score_disp:number;
+	let version_score_disp:number;
 	
 	//@Priyanka change implemented metrics to display 0 , unimplemented -1
 	if (license_score_calc == null) {
@@ -425,14 +425,14 @@ export function get_weighted_sum(scores:ScoresWithoutNet):ScoresWithNet {
 
 export function calc_final_result(metrics_array:GroupMetric[]):OutputObject[] {
 	logger.log('info', "\nMetrics array of objects for each metric: \n" + JSON.stringify(metrics_array, null, 4));
-	var scores_map_with_net = new Map<string, ScoresWithNet>();
+	const scores_map_with_net = new Map<string, ScoresWithNet>();
 	
-	for (var i = 0; i < metrics_array.length; i += 6) {
-		var single_url_metrics:GroupMetric[] = metrics_array.slice(i, i+6);
-		var scores_without_net:ScoresWithoutNet = new ScoresWithoutNet(null, null, null, null, null, null, null);
-		var url_val:string = "";
+	for (let i = 0; i < metrics_array.length; i += 6) {
+		const single_url_metrics:GroupMetric[] = metrics_array.slice(i, i+6);
+		const scores_without_net:ScoresWithoutNet = new ScoresWithoutNet(null, null, null, null, null, null, null);
+		let url_val = "";
 
-		for (var j = 0; j < single_url_metrics.length; j++) {
+		for (let j = 0; j < single_url_metrics.length; j++) {
 
 			if ((i + j) >= metrics_array.length) {
 				break;
@@ -506,22 +506,22 @@ export function calc_final_result(metrics_array:GroupMetric[]):OutputObject[] {
 					break;
 			}
 		}
-		var net_score_obj:ScoresWithNet = get_weighted_sum(scores_without_net);
+		const net_score_obj:ScoresWithNet = get_weighted_sum(scores_without_net);
 		scores_map_with_net.set(url_val, net_score_obj);
 	}
 	logger.log('debug', "Scores map with net score \n" + scores_map_with_net);
-	var scores_map_only_net = new Map<string, number>();
-	scores_map_with_net.forEach((value, key, map) => {
+	const scores_map_only_net = new Map<string, number>();
+	scores_map_with_net.forEach((value, key) => {
 		scores_map_only_net.set(key, value.net_score);
 	});
 	logger.log('debug', "Scores map with only net score\n" + scores_map_only_net);
-	let sortedMap = new Map([...scores_map_only_net.entries()].sort((a, b) => b[1] - a[1]));
+	const sortedMap = new Map([...scores_map_only_net.entries()].sort((a, b) => b[1] - a[1]));
 	logger.log('debug', "Scores map with only net score sorted \n" + sortedMap);
-	let outputArr:OutputObject[] = [];
-	sortedMap.forEach((value, key, map) => {
+	const outputArr:OutputObject[] = [];
+	sortedMap.forEach((value, key) => {
 		const curr_url_scores = scores_map_with_net.get(key);
 		if (curr_url_scores != undefined) {
-			var output_object:OutputObject = new OutputObject(key, curr_url_scores.net_score,
+			const output_object:OutputObject = new OutputObject(key, curr_url_scores.net_score,
 			curr_url_scores.ramp_up_score, curr_url_scores.correctness_score,
 			curr_url_scores.bus_factor_score, curr_url_scores.responsive_maintainer_score,
 			curr_url_scores.license_score, curr_url_scores.version_score);

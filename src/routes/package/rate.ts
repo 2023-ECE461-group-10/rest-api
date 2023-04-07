@@ -1,5 +1,5 @@
 import express from 'express';
-import { process_urls, calc_final_result, get_file_lines, OutputObject }  from '../../package-metrics/src/index';
+import { process_urls, calc_final_result, OutputObject }  from '../../package-metrics/src/index';
 import { Request, Response } from 'express';
 
 const router = express.Router();
@@ -10,7 +10,7 @@ router.get('/:id/rate', async (req: Request, res: Response) => {
     //await process_urls(filename, calc_final_result);
     try {
         //var url_vals:string[] = await get_file_lines('../sample_url_file copy.txt');
-        var rating:OutputObject[] = await process_urls(["https://github.com/nullivex/nodist"], calc_final_result);
+        const rating:OutputObject[] = await process_urls(["https://github.com/nullivex/nodist"], calc_final_result);
         res.status(200).json(rating[0]);
     } catch {
         res.status(500).end();

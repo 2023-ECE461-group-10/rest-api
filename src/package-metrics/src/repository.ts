@@ -1,4 +1,4 @@
-import { Issue, Contributor, Contributions } from "./github_repository"
+import { Issue, Contributions } from "./github_repository"
 
 /* Repository Class
  * Abstract class to be extendedd for all current and future Repository subclass
