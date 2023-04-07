@@ -6,9 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run dev",
-    "prod": "tsc; dotenv -e .prod.env node dist/index.js",
+    "prod": "tsc; dotenv -e .prod.env node dist/src/index.js",
     "clean": "rm -Rf dist",
-    "dev": "tsc; dotenv -e  .dev.env node dist/index.js",
+    "dev": "tsc; dotenv -e  .dev.env node dist/src/index.js",
     "test": "jest --coverage --detectOpenHandles --coverageReporters=\"json-summary\" --json --outputFile=\"./coverage/output-final.json\""
   },
   "repository": {
