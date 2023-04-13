@@ -6,24 +6,13 @@
 
 #### 1. ``npm install``
 
-#### 2. ``cp envs/.env.dev .env``
+#### 2. ``npm run test``
 
-After you complete the above two steps and have installed docker compose, you can start developing. Although you won't be
-able to run a local server without following steps 3 and 4, you can still write tests to verify your changes. The test suite
-creates a docker container with a MySQL server in it, runs the tests against this server, and destroys the container after tests have completed. Follow the example in integration.test.ts to write tests of your own.
+After you have completed this step, you can start developing. Although it is not possible to run a local server without completing step 3, you can still write and run tests to verify your changes. ``npm run test`` creates a docker container with a MySQL server in it, runs the tests against the server, and destroys the container after tests have completed. Follow the example in integration.test.ts to write tests of your own.
 
-#### 3. (Optional) Create Tables in Local Database
-You will need to modify ``DATABASE_URL`` in ``.env`` with the appropriate username and password to login to your local MySQL server.
-If you test your changes with the test suite, it is not necessary to setup a local database manually. The test suite will do it
-for you. 
-
-``npx prisma db push``
-
-#### 4. (Optional) Seed Database with Initial Data
-1. ``npx prisma db seed``
-
-### Run Local Server
-1. ``npm run start``
-
-### Run Local Tests
-1. ``npm run test``
+#### 3. (Optional) Running a local server
+1. ``cp envs/.env.dev .env``
+1. Update ``DATABASE_URL`` in ``.env`` with the appropriate username and password to login to your local MySQL server.
+2. Create tables in the local database: ``dotenv -e .env npx prisma db push``
+3. Seed the tables with initial data: ``dotenv -e .env npx prisma db seed``
+4. Run a local dev server listening on port 8080: ``npm run start``
