@@ -6,7 +6,7 @@
 
 #### 1. ``npm install``
 
-#### 2. Ensure docker compose is intalled on your machine
+#### 2. Ensure ``docker compose`` is intalled on your machine
 
 #### 3. ``npm run test``
 
