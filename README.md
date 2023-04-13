@@ -6,9 +6,11 @@
 
 #### 1. ``npm install``
 
-#### 2. ``npm run test``
+#### 2. Ensure docker compose is intalled on your machine
 
-After you have completed this step, you can start developing. Although it is not possible to run a local server without completing step 3, you can still write and run tests to verify your changes. ``npm run test`` creates a docker container with a MySQL server in it, runs the tests against the server, and destroys the container after tests have completed. Follow the example in integration.test.ts to write tests of your own.
+#### 3. ``npm run test``
+
+After you have completed the above steps, you can start developing. Although it is not possible to run a local server without completing step 3, you can still write and run tests to verify your changes. ``npm run test`` creates a docker container with a MySQL server in it, runs the tests against the server, and destroys the container after tests have completed. Follow the example in integration.test.ts to write tests of your own.
 
 #### 3. (Optional) Running a local server
 1. ``cp envs/.env.dev .env``
