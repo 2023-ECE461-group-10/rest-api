@@ -475,3 +475,41 @@ async function countPinnedToMajorMinor(dependencies: any): Promise<number> {
 
 	return count;
 }
+
+export class PullRequestMetric extends Metric {
+	async get_metric(repo: Repository): Promise<GroupMetric> {
+		let score = 0; // subscore for pull requests
+		const pullRequests: any = await repo.get_pulls(); //get merged pull requests
+
+		//pull request calcs
+		if (pullRequests == null) {
+			logger.log('info', "No Package found");
+			score = 1;
+		}
+		else {
+			score = await pullCalc(pullRequests); //calc the readme score
+		}
+
+		return new Promise((resolve) => {
+			resolve(new GroupMetric(repo.url, "PULL_REQUEST_SCORE", score));
+		});
+	}
+}
+
+async function pullCalc(pullRequests: any): Promise<number> {
+	const pullRequestsWithReview = pullRequests.repository.pullRequests.edges.filter((edge: any) => edge.node.reviews.totalCount > 0);
+	const pullRequestsWithoutReview = pullRequests.repository.pullRequests.edges.filter((edge: any) => edge.node.reviews.totalCount === 0);
+
+	const additionsWithReview: number = pullRequestsWithReview.reduce(
+		(accumulator: number, currentValue: any) => accumulator + currentValue.node.additions, 0
+	);
+	const additionsWithoutReview: number = pullRequestsWithoutReview.reduce(
+		(accumulator: number, currentValue: any) => accumulator + currentValue.node.additions, 0
+	);
+	const totalAdditions: number = additionsWithReview + additionsWithoutReview;
+
+	const score: number = additionsWithReview / totalAdditions;
+
+	logger.log('info', "Version pinning score " + score);
+	return score;
+}
