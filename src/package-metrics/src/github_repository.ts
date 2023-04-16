@@ -391,20 +391,19 @@ export class GithubRepository extends Repository {
 		var first200PullRequests: GraphQlQueryResponseData | null = null;
 		try {
 			first200PullRequests = await graphql({
-				query: `query PullRequestQuery($owner: String!, $repo: String!) {
-				  repository(owner: $owner, name: $repo) {
-					pullRequests(states: MERGED, first: 200) {
-					  edges{
-						node{
-						  additions
-						  deletions
-						  reviews(first: 1) {
-							totalCount
-						  }
+				query: `query pullRequests($owner: String!, $repo: String!) {
+					repository(owner: $owner, name: $repo) {
+						pullRequests(states: MERGED, first: 100) {
+							edges {
+								node {
+									additions,
+									reviews(first: 1) {
+										totalCount,
+									}
+								}
+							}
 						}
-					  }
 					}
-				  }
 				}`,
 				owner: this.owner,
 				repo: this.repo,
