@@ -6,6 +6,7 @@ import { ESLint } from "eslint";
 
 import fs from "fs"
 import path from "path"
+import internal from "stream";
 
 type NullNum = number | null;
 
@@ -429,7 +430,7 @@ export class VersionMetric extends Metric {
 		}
 
 		return new Promise((resolve) => {
-			resolve(new GroupMetric(repo.url, "RAMP_UP_SCORE", score));
+			resolve(new GroupMetric(repo.url, "VERSION_SCORE", score));
 		});
 	}
 }
@@ -465,7 +466,7 @@ async function versionCalc(packages: any): Promise<number> {
 
 async function countPinnedToMajorMinor(dependencies: any): Promise<number> {
 	let count = 0;
-	const re = /^\d+\.\d+\.(x|X)$/
+	const re = /^\d+\.\d+(.(x|X))?$/
 
 	for (const dependency in dependencies) {
 		if (re.test(dependencies[dependency])) {
