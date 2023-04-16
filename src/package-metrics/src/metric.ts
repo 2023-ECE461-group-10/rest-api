@@ -6,7 +6,6 @@ import { ESLint } from "eslint";
 
 import fs from "fs"
 import path from "path"
-import internal from "stream";
 
 type NullNum = number | null;
 
