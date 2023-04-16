@@ -6,3 +6,6 @@ package-metrics/node_modules
 package-metrics/build
 logs
 coverage
+.env
+tests/db/init.sql
+.DS_Store
