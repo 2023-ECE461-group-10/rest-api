@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyAccessToken } from '../auth';
+import { verifyAccessToken } from '../services/auth';
 
-export async function AuthMiddleware(req: Request, res: Response, next: NextFunction) {
+async function AuthMiddleware(req: Request, res: Response, next: NextFunction) {
     const token = req.get('X-Authorization');
     try {
         req.authTokenData = await verifyAccessToken(token);
@@ -10,3 +10,16 @@ export async function AuthMiddleware(req: Request, res: Response, next: NextFunc
         res.status(400).end();
     }
 }
+
+function IfNotAdmin(notAdminStatus: number)  {
+    return (req: Request, res: Response, next: NextFunction) => {
+        if (!req.authTokenData.isAdmin)
+            res.status(notAdminStatus).end();
+        next();
+    };
+}
+
+export {
+    AuthMiddleware,
+    IfNotAdmin
+};
