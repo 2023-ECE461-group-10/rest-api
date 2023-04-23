@@ -1,6 +1,6 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { authenticate } from '../auth';
+import { authenticate } from '../services/auth';
 import * as api from '../types/api';
 
 const router = express.Router();
@@ -15,7 +15,6 @@ router.put('/', async (req: Request, res: Response) => {
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify(token));
     } catch (e) {
-        console.log(e);
         res.status(401).end();
     }
 });

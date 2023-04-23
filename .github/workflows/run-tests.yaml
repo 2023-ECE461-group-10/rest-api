@@ -1,4 +1,4 @@
-name: Run tests
+name: Run tests and linter
 
 on:
   pull_request:
@@ -13,8 +13,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: '2.14.2' # the full version of `docker-compose` command
+
       - name: Run tests
         run: npm run test
       
       - name: Run linter
-        run: npx eslint .
+        run: npm run lint

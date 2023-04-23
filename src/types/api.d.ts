@@ -1,8 +1,13 @@
-export type User = {
+type User = {
     name: string,
     isAdmin: boolean
 };
 
-export type UserAuthenticationInfo = {
+type UserAuthenticationInfo = {
     password: string
 }
+
+export {
+    User,
+    UserAuthenticationInfo
+};

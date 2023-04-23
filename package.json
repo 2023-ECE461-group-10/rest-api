@@ -5,11 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "npm run dev",
-    "prod": "tsc; dotenv -e .prod.env node dist/index.js",
+    "start": "tsc; dotenv -e .env node dist/index.js",
     "clean": "rm -Rf dist",
-    "dev": "tsc; dotenv -e  .dev.env node dist/index.js",
-    "test": "jest --coverage --detectOpenHandles --coverageReporters=\"json-summary\" --json --outputFile=\"./coverage/output-final.json\""
+    "test": "./test.sh",
+    "lint": "npx eslint ."
   },
   "repository": {
     "type": "git",
@@ -22,12 +21,15 @@
   },
   "homepage": "https://github.com/2023-ECE461-group-10/rest-api#readme",
   "dependencies": {
+    "@prisma/client": "^4.12.0",
+    "@types/bcrypt": "^5.0.0",
     "@types/express": "^4.17.17",
     "@types/supertest": "^2.0.12",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
+    "@typescript-eslint/eslint-plugin": "^5.58.0",
+    "@typescript-eslint/parser": "^5.58.0",
+    "bcrypt": "^5.1.0",
     "dotenv-cli": "^7.1.0",
-    "eslint": "^8.37.0",
+    "eslint": "^8.38.0",
     "eslint-plugin-import": "^2.27.5",
     "express": "^4.18.2",
     "express-openapi-validator": "^5.0.3",
@@ -35,7 +37,7 @@
     "jest": "^29.5.0",
     "jsonwebtoken": "^9.0.0",
     "node-fetch": "^3.3.1",
-    "nodejs-file-downloader": "^4.11.0",
+    "nodejs-file-downloader": "^4.11.1",
     "octokit": "^2.0.14",
     "supertest": "^6.3.3",
     "ts-jest": "^29.0.5",
@@ -46,7 +48,13 @@
     "@types/eslint": "^8.37.0",
     "@types/jsonwebtoken": "^9.0.1",
     "@types/node": "^18.14.6",
+    "install": "^0.13.0",
     "nodemon": "^2.0.21",
+    "npm": "^9.6.4",
+    "prisma": "^4.12.0",
     "typescript": "^4.9.5"
+  },
+  "prisma": {
+    "seed": "dotenv -e .env.main ts-node src/db/seed.ts"
   }
 }
