@@ -1,4 +1,4 @@
-import { app } from './server';
+import { app } from './app';
 import { createLogger, format, transports } from "winston";
 import { get_log_level, get_log_file } from './package-metrics/src/index'
 

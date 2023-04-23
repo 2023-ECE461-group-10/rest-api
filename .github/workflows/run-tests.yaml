@@ -12,9 +12,6 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-      
-      - name: Copy appropriate .env.ci to .env
-        run: cp envs/.env.ci .env
 
       - uses: KengoTODA/actions-setup-docker-compose@v1
         with:

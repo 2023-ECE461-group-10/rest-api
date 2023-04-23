@@ -15,6 +15,6 @@ After you have completed the above steps, you can start developing. Although it 
 #### 3. (Optional) Running a local server
 1. ``cp envs/.env.dev .env``
 1. Update ``DATABASE_URL`` in ``.env`` with the appropriate username and password to login to your local MySQL server.
-2. Create tables in the local database: ``dotenv -e .env npx prisma db push``
-3. Seed the tables with initial data: ``dotenv -e .env npx prisma db seed``
-4. Run a local dev server listening on port 8080: ``npm run start``
+2. Create tables in the local database: ``npx prisma db push``
+3. Seed the tables with initial data: ``npx prisma db seed``
+4. Run a local dev server: ``npm run start``
