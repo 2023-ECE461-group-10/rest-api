@@ -11,7 +11,7 @@ router.get('/:id/rate', async (req: Request, res: Response) => {
     //await process_urls(filename, calc_final_result);
     //TODO: add 400 and 404 responses
 
-    const packageRecord = await prisma.package.findUnique({where: { id: req.params.id }});
+    const packageRecord = await prisma.package.findUnique({where: { id: parseInt(req.params.id) }});
 
     if (!packageRecord) {
         res.status(404).end();
