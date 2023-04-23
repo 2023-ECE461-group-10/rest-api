@@ -18,3 +18,4 @@ After you have completed the above steps, you can start developing. Although it 
 2. Create tables in the local database: ``npx prisma db push``
 3. Seed the tables with initial data: ``npx prisma db seed``
 4. Run a local dev server: ``npm run start``
+
