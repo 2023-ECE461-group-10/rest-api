@@ -13,7 +13,7 @@ import { AuthMiddleware } from './middleware/auth';
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: '1gb' }));
 app.use(express.text());
 app.use(express.urlencoded({extended: false}));
 

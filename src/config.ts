@@ -9,7 +9,10 @@ type Config = {
     jwtSignOpts: {
         expiresIn: string
     },
-    defaultUserCreateCmd: UserCreate
+    defaultUserCreateCmd: UserCreate,
+    gcpStorageClientConfig: {
+        keyFilename: string
+    }
 }
 
 const config: Config = {
@@ -24,6 +27,9 @@ const config: Config = {
         username: process.env.DEFAULT_USER_NAME || 'admin',
         isAdmin: process.env.DEFAULT_USER_ISADMIN == '1',
         password: process.env.DEFAULT_USER_PASSWORD || 'admin'
+    },
+    gcpStorageClientConfig: {
+        keyFilename: path.join(__dirname, '../gcpkeyfile.json')
     }
 };
 

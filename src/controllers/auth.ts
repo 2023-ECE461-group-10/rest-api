@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { AuthTokenData } from '../types/auth';
 import config from '../config';
 import api from '../types/api';
-import { prisma } from '../prisma';
+import { prisma } from '../clients';
 import bcrypt from 'bcrypt';
 
 const SALT_ROUNDS = 10;

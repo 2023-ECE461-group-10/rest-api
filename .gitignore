@@ -2,5 +2,9 @@ node_modules
 dist
 coverage
 .env
+db/init.sql
 __tests__/db/init.sql
+__tests__/integration/crud.ts
+__tests__/data/lodash_5.0.0
 .DS_Store
+gcpkeyfile.json

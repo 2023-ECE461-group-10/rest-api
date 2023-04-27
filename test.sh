@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker compose -f test-mysql-db-docker.yml up&
+docker compose up&
 
 # Wait for container to spin up
 mysql -u root -ptest test -e "SELECT 1" -P 8001 --protocol=tcp
@@ -17,6 +17,6 @@ npx dotenv -e .env.test jest --coverage --detectOpenHandles --coverageReporters=
 
 RC=$?
 
-docker compose -f test-mysql-db-docker.yml down
+docker compose down
 
 exit $RC

@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { PrismaClient } from '@prisma/client';
-import { verifyAccessToken } from '../../src/services/auth';
+import { verifyAccessToken } from '../../src/controllers/auth';
 import { app } from '../../src/app';
 import { User, UserAuthenticationInfo } from '../../src/types/api';
-import * as request from 'supertest';
+import * as supertest from 'supertest';
 import config from '../../src/config';
 import { UserModelUtils } from '../../prisma/user';
-import { sendAuthenticateRequest } from './common';
+import * as api from '../../src/types/api';
 
 const prisma = new PrismaClient();
 const userModelUtils = new UserModelUtils(prisma);
-const agent = request.agent(app);
+const agent = supertest.agent(app);
 
 const defaultUser: User = {
     name: config.defaultUserCreateCmd.username,
@@ -22,6 +22,7 @@ const defaultSecret: UserAuthenticationInfo = {
 };
 
 beforeAll(async () => {
+    await prisma.user.deleteMany();
     await userModelUtils.create({
         username: defaultUser.name,
         isAdmin: defaultUser.isAdmin,
@@ -77,3 +78,17 @@ describe('PUT /authenticate', () => {
         expect(res.statusCode).toBe(400);
     });
 });
+
+async function sendAuthenticateRequest(
+    agent: supertest.SuperAgentTest,
+    user: api.User,
+    secret: api.UserAuthenticationInfo):
+    Promise<supertest.Response>
+{
+    return await agent.put("/authenticate")
+        .set('Content-Type', 'application/json')
+        .send({
+            User: user,
+            Secret: secret
+        });
+}

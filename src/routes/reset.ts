@@ -2,7 +2,7 @@ import express from 'express';
 import { Request, Response } from 'express';
 import config from '../config';
 import { IfNotAdmin } from '../middleware/auth';
-import { prisma, userModelUtils } from '../prisma';
+import { prisma, userModelUtils } from '../clients';
 
 const router = express.Router();
 
