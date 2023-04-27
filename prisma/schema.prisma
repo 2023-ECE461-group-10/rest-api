@@ -18,16 +18,9 @@ model User {
 }
 
 model Package {
-  id                   Int    @id @default(autoincrement())
+  id                   Int     @id @default(autoincrement())
   name                 String
   version              String
   url                  String
-  rampUp               Float?
-  correctness          Float?
-  busFactor            Float?
-  responsiveMaintainer Float?
-  licenseScore         Float?
-  goodPinningPractice  Float?
-  pullRequest          Float?
-  netScore             Float?
+  readme               String  @db.Text
 }

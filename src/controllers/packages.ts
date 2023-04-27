@@ -1,13 +1,34 @@
 import fs from 'fs';
 import * as path from 'path';
-import { mkdir, writeFile, rm, readFile } from 'fs/promises';
+import { writeFile, rm, readFile, readdir } from 'fs/promises';
 import decompress from 'decompress';
-import { gcpStorage, prisma } from '../clients';
+import { gcpStorage } from '../clients';
+import parse from 'parse-github-url';
+import { cloneRepo } from './git';
+import AdmZip from 'adm-zip';
+
+type PkgJSON = {
+    name: string,
+    version: string,
+    repository: {
+        url: string
+    },
+    homepage: {
+        url: string
+    }
+}
+
+type PkgData = {
+    metadata: PkgMetadata,
+    content: string
+};
 
 type PkgMetadata = {
+    name: string,
     version: string,
-    name: string
-};
+    url: string,
+    readme: string
+}
 
 const PARENT_DIR = process.env.WORK_DIR_PARENT;
 const WORK_DIR_PREFIX = 'work_dir_';
@@ -39,16 +60,74 @@ function removeWorkDir(workDir: string) {
     fs.rmSync(workDir, { recursive: true, force: true });
 }
 
-async function getMetadata(base64Content: string): Promise<PkgMetadata> {
-    const workDir = createWorkDir();
+function findReadme(pkgDir: string): string {
+    return fs.readdirSync(pkgDir, {withFileTypes: true})
+        .filter(f => f.isFile())
+        .filter(f => f.name.toLowerCase().startsWith('readme'))
+        .map(f => f.name)[0];
+}
+
+async function decompressBase64Zip(base64Zip: string, workDir: string) {
     const zipPath = path.join(workDir, 'ece461restapi.zip');
-    await writeFile(zipPath, base64Content, {encoding: 'base64'});
+    await writeFile(zipPath, base64Zip, {encoding: 'base64'});
     await decompress(zipPath, workDir);
-    const pkgJSONPath = path.join(workDir, 'package.json');
-    const contents = await readFile(pkgJSONPath, {encoding: 'utf8'});
+    await rm(zipPath);
+}
+
+async function createZip(dir: string): Promise<string> {
+    const zip = new AdmZip();
+    const entries = (await Promise.all(await readdir(dir, { withFileTypes: true })));
+
+    entries.filter(e => e.isDirectory())
+        .map(d => path.join(dir, d.name))
+        .forEach(d => zip.addLocalFolder(d));
+
+    entries.filter(e => e.isFile())
+        .map(f => path.join(dir, f.name))
+        .forEach(f => zip.addLocalFile(f));
+    
+    const buffer = await zip.toBufferPromise();
+    return buffer.toString('base64');
+}
+
+async function extractPkgMetadata(pkgDir: string): Promise<PkgMetadata> {
+    const pkgJSONPath = path.join(pkgDir, 'package.json');
+    const pkgJSONStr = await readFile(pkgJSONPath, {encoding: 'utf8'});
+    const pkgJSON: PkgJSON = JSON.parse(pkgJSONStr);
+    const name = pkgJSON.name;
+    const version = pkgJSON.version;
+    const parsed = parse(pkgJSON.repository.url || pkgJSON.homepage.url);
+    const url = `https://github.com/${parsed.repository}`;
+    
+    const readmePath = path.join(pkgDir, findReadme(pkgDir));
+    const readme = await readFile(readmePath, {encoding: 'utf8'});
+
+    return { name, version, url, readme }
+}
+
+async function extractFromZip(content: string): Promise<PkgData> {
+    const workDir = createWorkDir();
+    await decompressBase64Zip(content, workDir);
+    const metadata = await extractPkgMetadata(workDir);
     removeWorkDir(workDir);
 
-    return JSON.parse(contents);
+    return {
+        metadata: metadata,
+        content: content
+    };
+}
+
+async function extractFromRepo(url: string): Promise<PkgData> {
+    const workDir = createWorkDir();
+    await cloneRepo(url, workDir);
+    const metadata = await extractPkgMetadata(workDir);
+    const content = await createZip(workDir);
+    removeWorkDir(workDir);
+
+    return {
+        metadata: metadata,
+        content: content
+    };
 }
 
 async function gcpUpload(filename: string, base64File: string) {
@@ -92,7 +171,10 @@ function createPkgFilename(name: string, version: string): string {
 }
 
 export {
-    getMetadata,
+    PkgData,
+    extractPkgMetadata,
+    extractFromZip,
+    extractFromRepo,
     gcpUpload,
     gcpDownload,
     gcpDelete,
