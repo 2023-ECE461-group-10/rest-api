@@ -379,5 +379,56 @@ export class GithubRepository extends Repository {
 			resolve(pkg);
 		});
 	}
-}
 
+	async get_pulls(): Promise<any | null> {
+		var rv: any | null = null;
+		var jdata: any;
+	
+		// GRAPHQL CALLS
+		// get the string Date of 1 year ago
+		const set_date = new Date();
+		set_date.setMonth(set_date.getMonth() - 12);
+		var first200PullRequests: GraphQlQueryResponseData | null = null;
+		try {
+			first200PullRequests = await graphql({
+				query: `query pullRequests($owner: String!, $repo: String!) {
+					repository(owner: $owner, name: $repo) {
+						pullRequests(states: MERGED, first: 100) {
+							edges {
+								node {
+									additions,
+									reviews(first: 1) {
+										totalCount,
+									}
+								}
+							}
+						}
+					}
+				}`,
+				owner: this.owner,
+				repo: this.repo,
+				headers: {
+					authorization: 'bearer ' + process.env.GITHUB_TOKEN,
+				},
+			});
+		} catch (error) {
+			if (error instanceof GraphqlResponseError) {
+				logger.log('error', "GraphQL PullRequests query failed: " + error.message);
+			}
+			else {
+				logger.log('error', "GraphQL PullRequests query failed for reason unknown!");
+			}
+		}
+		if (first200PullRequests == null) {
+			logger.log('error', "GraphQL PullRequests null check failed" + first200PullRequests);
+		}
+		else {
+			jdata = JSON.parse(JSON.stringify(first200PullRequests));
+			rv = jdata;
+		}
+	
+		return new Promise((resolve) => {
+			resolve(rv);
+		});
+	}
+}

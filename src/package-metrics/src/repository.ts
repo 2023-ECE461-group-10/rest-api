@@ -47,4 +47,6 @@ export abstract class Repository {
     abstract get_contributors_stats():Promise<Contributions>;
 
 	abstract get_package_json():Promise<any | null>;
+
+	abstract get_pulls():Promise<any | null>;
 }
