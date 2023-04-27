@@ -29,7 +29,7 @@ const config: Config = {
         password: process.env.DEFAULT_USER_PASSWORD || 'admin'
     },
     gcpStorageClientConfig: {
-        keyFilename: path.join(__dirname, '../gcpkeyfile.json')
+        keyFilename: process.env.GCP_KEY_FILE_LOCATION || ''
     }
 };
 
