@@ -21,6 +21,7 @@ model Package {
   id                   Int    @id @default(autoincrement())
   name                 String
   version              String
+  url                  String
   rampUp               Float?
   correctness          Float?
   busFactor            Float?
