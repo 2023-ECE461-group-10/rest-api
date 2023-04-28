@@ -168,13 +168,14 @@ router.put('/:id', async (req: Request, res: Response) => {
 
 router.delete('/:id', async (req: Request, res: Response) => {
     logger.log('info', 'Deleting package...');
-    const pkg = await prisma.package.delete({
-        where: {
-            id: parseInt(req.params.id)
-        }
-    });
-
-    if (!pkg) {
+    let pkg;
+    try {
+        pkg = await prisma.package.delete({
+            where: {
+                id: parseInt(req.params.id)
+            }
+        });
+    } catch (e) {
         res.status(404).end();
         logger.log('info', 'Package not found.');
         return;
@@ -202,16 +203,22 @@ router.delete('/byName/:name', async (req: Request, res: Response) => {
 
     logger.log('info', 'Deleting package by name...');
 
-    const pkgs = await prisma.package.deleteMany({ 
-        where: {
-            name: req.params.name
-        }
-    });
+    try { 
+        await prisma.package.deleteMany({ 
+            where: {
+                name: req.params.name
+            }
+        });
+    } catch (e) {
+        res.status(404).end();
+        logger.log('info', 'No packages to deleted');
+        return;
+    }
 
     // Won't delete them from gcp
-
-    res.status(pkgs ? 200 : 404).end();
-    logger.log('info', 'Package deleted.');
+    
+    logger.log('info', 'Packages deleted.');
+    res.status(200).end();
 });
 
 export = router;
