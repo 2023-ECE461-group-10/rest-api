@@ -2,6 +2,8 @@ import express from 'express';
 import * as OpenAPIValidator from 'express-openapi-validator';
 
 import config from './config';
+import logger from './logger';
+global.logger = logger;
 
 import PackagesRoute from './routes/packages';
 import PackageRoute from './routes/package';
