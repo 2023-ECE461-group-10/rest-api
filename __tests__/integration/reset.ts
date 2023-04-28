@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals'; 
 import { PrismaClient } from '@prisma/client';
 import { app } from '../../src/app';
-import { generateAccessToken } from '../../src/services/auth';
+import { generateAccessToken } from '../../src/controllers/auth';
 import * as supertest from 'supertest';
 import config from '../../src/config';
 import { UserModelUtils, UserCreate } from '../../prisma/user';
@@ -17,6 +17,8 @@ let adminToken: string;
 let nonAdminToken: string;
 
 beforeAll(async() => {
+    await prisma.user.deleteMany();
+
     adminToken = await generateAccessToken({
         username: config.defaultUserCreateCmd.username,
         isAdmin: config.defaultUserCreateCmd.isAdmin

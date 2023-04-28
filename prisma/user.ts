@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import { generatePasswordHash } from '../src/services/auth';
+import { generatePasswordHash } from '../src/controllers/auth';
 
 type UserCreate = {
     username: string,

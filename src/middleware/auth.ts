@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyAccessToken } from '../services/auth';
+import { verifyAccessToken } from '../controllers/auth';
 
 async function AuthMiddleware(req: Request, res: Response, next: NextFunction) {
     const token = req.get('X-Authorization');

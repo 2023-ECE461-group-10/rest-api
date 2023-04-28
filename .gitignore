@@ -7,5 +7,7 @@ package-metrics/build
 logs
 coverage
 .env
+db/init.sql
 __tests__/db/init.sql
 .DS_Store
+gcpkeyfile.json

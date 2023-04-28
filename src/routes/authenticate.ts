@@ -1,6 +1,6 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import { authenticate } from '../services/auth';
+import { authenticate } from '../controllers/auth';
 import * as api from '../types/api';
 
 const router = express.Router();

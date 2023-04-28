@@ -14,6 +14,12 @@ services:
     volumes:
       - db:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  gcp-storage:
+    image: fsouza/fake-gcs-server
+    container_name: TestGCPStorage
+    restart: always
+    ports:
+      - '4443:4443'
 volumes:
   db:
     driver: local
