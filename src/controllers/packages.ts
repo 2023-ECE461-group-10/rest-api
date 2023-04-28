@@ -60,7 +60,7 @@ function removeWorkDir(workDir: string) {
     fs.rmSync(workDir, { recursive: true, force: true });
 }
 
-function findReadme(pkgDir: string): string {
+function findReadme(pkgDir: string): string | undefined {
     return fs.readdirSync(pkgDir, {withFileTypes: true})
         .filter(f => f.isFile())
         .filter(f => f.name.toLowerCase().startsWith('readme'))
@@ -100,7 +100,10 @@ async function extractPkgMetadata(pkgDir: string): Promise<PkgMetadata> {
     const url = `https://github.com/${parsed.repository}`;
     
     const readmePath = path.join(pkgDir, findReadme(pkgDir));
-    const readme = await readFile(readmePath, {encoding: 'utf8'});
+    let readme = '';
+    if (readmePath) {
+        readme = await readFile(readmePath, {encoding: 'utf8'});
+    }
 
     return { name, version, url, readme }
 }
