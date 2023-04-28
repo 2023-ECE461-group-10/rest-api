@@ -13,5 +13,5 @@
       "*": ["node_modules/*"]
     }
   },
-  "include": ["src/**/*", "prisma/db"]
+  "include": ["src/**/*", "prisma/*"]
 }
