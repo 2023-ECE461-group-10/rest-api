@@ -9,6 +9,7 @@ class PackageModelUtils {
     }
 
     async checkPkgExists(name: string, version: string): Promise<boolean> {
+        logger.log('info', 'Checking if package exists...');
         const pkg = await this.prisma.package.findFirst({where: {
             name: name,
             version: version
