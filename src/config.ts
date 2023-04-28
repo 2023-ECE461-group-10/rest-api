@@ -16,9 +16,14 @@ type Config = {
 }
 
 const testing = process.env.TESTING == '1';
+
 const apiSpec = testing ?
     path.join(__dirname, '../openapi/apispec.yaml') :
     path.join(__dirname, '../../openapi/apispec.yaml');
+
+const gcpKeyFile = testing ? 
+    path.join(__dirname, '../gcpkeyfile.json') :
+    path.join(__dirname, '../../gcpkeyfile.json');
 
 const config: Config = {
     openAPIValidatorOpts: {
@@ -34,7 +39,7 @@ const config: Config = {
         password: process.env.DEFAULT_USER_PASSWORD || 'admin'
     },
     gcpStorageClientConfig: {
-        keyFilename: process.env.GCP_KEY_FILE_LOCATION || ''
+        keyFilename: gcpKeyFile
     }
 };
 
