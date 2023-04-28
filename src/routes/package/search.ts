@@ -6,6 +6,7 @@ import { Package } from '@prisma/client';
 const router = express.Router();
 
 router.post('/byRegEx', async (req: Request, res: Response) => {
+    logger.log('info', 'Searching for package...');
     const regex = req.body.RegEx;
 
     const pkgs = await prisma
@@ -13,8 +14,11 @@ router.post('/byRegEx', async (req: Request, res: Response) => {
 
     if (!pkgs) {
         res.status(404).end();
+        logger.log('info', 'Package not found.');
         return;
     }
+
+    logger.log('info', 'Package found.');
 
     res.status(200).send(pkgs.map(pkg => {
         return {

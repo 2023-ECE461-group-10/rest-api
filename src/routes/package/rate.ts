@@ -6,11 +6,7 @@ import { prisma } from '../../clients';
 const router = express.Router();
 
 router.get('/:id/rate', async (req: Request, res: Response) => {
-    //TODO: once we have a database with packages, need to have this get the url associated with the package id,
-    //for now it's set up to get the url from a file.
-    //await process_urls(filename, calc_final_result);
-    //TODO: add 400 and 404 responses
-
+    logger.log('info', 'Rating package...');
     const pkg = await prisma.package.findUnique({
         where: {
             id: parseInt(req.params.id)
@@ -19,6 +15,7 @@ router.get('/:id/rate', async (req: Request, res: Response) => {
 
     if (!pkg) {
         res.status(404).end();
+        logger.log('info', 'Package not found.');
         return;
     }
 
@@ -26,8 +23,10 @@ router.get('/:id/rate', async (req: Request, res: Response) => {
         //var url_vals:string[] = await get_file_lines('../sample_url_file copy.txt');
         const rating: OutputObject[] = await process_urls([pkg.url], calc_final_result);
         res.status(200).json(rating[0]);
+        logger.log('info', 'Package rated.');
     } catch {
         res.status(500).end();
+        logger.log('error', 'Error rating package!');
     }
 });
 

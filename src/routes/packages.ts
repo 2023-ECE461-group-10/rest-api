@@ -15,6 +15,8 @@ router.post('/', async (req: Request, res: Response) => {
     const name = req.body[0].Name;
     const offset = parseInt(req.query['offset'].toString()) || 0;
 
+    logger.log('info', 'Getting packages from registry...');
+
     let pkgs;
     if (name == '*') {
         pkgs = await prisma.package.findMany({
@@ -49,6 +51,7 @@ router.post('/', async (req: Request, res: Response) => {
         }
     });
     res.status(200).setHeader('offset', offset + 1).send(list);
+    logger.log('info', 'Got packages from registry.');
 });
 
 export = router;
