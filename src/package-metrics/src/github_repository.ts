@@ -241,19 +241,19 @@ export class GithubRepository extends Repository {
 		});
 	}
 
-	async get_contributors_stats(): Promise<Contributions> {
-		var contributors: Contributor[] = [];
+	async get_contributors_stats(): Promise<any | null> {
 		type ContentResponseType = GetResponseTypeFromEndpointMethod<
 			typeof this.octokit.rest.repos.listContributors>;
 		type ContentResponseDataType = GetResponseDataTypeFromEndpointMethod<
 			typeof this.octokit.rest.repos.listContributors>;
 		var cdata: ContentResponseDataType | null = null;
-		var rv: Contributions;
+		var rv: any;
 
 		try {
 			var content: ContentResponseType = await this.octokit.rest.repos.listContributors({
 				owner: this.owner,
 				repo: this.repo,
+				per_page: 100,
 				anon: "false",
 			});
 			cdata = content.data;
@@ -262,83 +262,35 @@ export class GithubRepository extends Repository {
 			logger.log('debug', "Could not fetch contributors list from " + this.owner + "/" + this.repo);
 		}
 
-		// this does not work for some reason - debug
-		// this is a workaround since we cannot seem to access object properties of cdata above
-		if (cdata != null) {
-			var jdata = JSON.parse(JSON.stringify(cdata));
-			for (const data of jdata) {
-				contributors.push(new Contributor(data.login, data.contributions));
-			}
-		}
+		rv = cdata;
 
+		return new Promise((resolve) => {
+			resolve(rv);
+		});
+	}
 
-		// GRAPHQL CALLS
-		// get the string Date of 1 year ago
-		const set_date = new Date();
-		set_date.setMonth(set_date.getMonth() - 12);
-		var lastContributions: GraphQlQueryResponseData | null = null;
-		var allContributions: GraphQlQueryResponseData | null = null;
+	async get_commits(): Promise<any | null> {
+		type ContentResponseType = GetResponseTypeFromEndpointMethod<
+			typeof this.octokit.rest.repos.listCommits>;
+		type ContentResponseDataType = GetResponseDataTypeFromEndpointMethod<
+			typeof this.octokit.rest.repos.listCommits>;
+		var cdata: ContentResponseDataType | null = null;
+		var rv: any;
+
 		try {
-			lastContributions = await graphql({
-				query: `query ContributionsQuery($owner: String!, $repo: String!, $since: GitTimestamp!) {
-				  repository(owner: $owner, name: $repo) {
-				    object(expression: "master") {
-				      ... on Commit {
-				        history(since: $since) {
-				          totalCount
-				        }
-				      }
-				    }
-				    latestRelease {
-				      publishedAt
-				    }
-				    pushedAt
-				  }
-				}`,
+			var content: ContentResponseType = await this.octokit.rest.repos.listCommits({
 				owner: this.owner,
 				repo: this.repo,
-				since: set_date,
-				headers: {
-					authorization: 'bearer ' + process.env.GITHUB_TOKEN,
-				},
+				per_page: 100,
+				anon: "false",
 			});
-			allContributions = await graphql({
-				query: `query NewQuery($repo: String!, $owner: String!) {
-				  repository(owner: $owner, name: $repo) {
-				    object(expression: "master") {
-				      ... on Commit {
-				        history {
-				          totalCount
-				        }
-				      }
-				    }
-				  }
-				}`,
-				owner: this.owner,
-				repo: this.repo,
-				headers: {
-					authorization: 'bearer ' + process.env.GITHUB_TOKEN,
-				},
-			});
+			cdata = content.data;
+			logger.log('info', "Fetched commits list from " + this.owner + "/" + this.repo);
 		} catch (error) {
-			if (error instanceof GraphqlResponseError) {
-				logger.log('error', "GraphQL call failed: " + error.message);
-			}
-			else {
-				logger.log('error', "GraphQL call failed for reason unknown!");
-			}
+			logger.log('debug', "Could not fetch commits list from " + this.owner + "/" + this.repo);
 		}
-		if ((lastContributions == null) || (allContributions == null)) {
-			logger.log('error', "GraphQL null check failed" + lastContributions + allContributions);
-			rv = new Contributions(null, null, null, null, contributors);
-		}
-		else {
-			jdata = JSON.parse(JSON.stringify(lastContributions));
-			var jdata2 = JSON.parse(JSON.stringify(allContributions));
-			rv = new Contributions(jdata.repository.object.history.totalCount, jdata2.repository.object.history.totalCount, jdata.repository.latestRelease.publishedAt,
-				jdata.repository.pushedAt, contributors);
-			logger.log('info', "Results of graphql needed for BusFactor 1yr: " + jdata.repository.object.history.totalCount + " alltime: " + jdata2.repository.object.history.totalCount);
-		}
+
+		rv = cdata;
 
 		return new Promise((resolve) => {
 			resolve(rv);
@@ -393,7 +345,7 @@ export class GithubRepository extends Repository {
 			first200PullRequests = await graphql({
 				query: `query pullRequests($owner: String!, $repo: String!) {
 					repository(owner: $owner, name: $repo) {
-						pullRequests(states: MERGED, first: 100) {
+						pullRequests(states: MERGED, last: 100) {
 							edges {
 								node {
 									additions,

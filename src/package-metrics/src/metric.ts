@@ -79,10 +79,8 @@ export class LicenseMetric extends Metric {
 export class RampUpMetric extends Metric {
 	async get_metric(repo: Repository): Promise<GroupMetric> {
 		let readmeScore = 0; // subscore for readme
-		let commentScore = 0; // subscore for comment ratio
 		let total_score = 0; //total ramp up score
 		const read_me: string | null = await repo.get_readme(); //get the readme
-		const clonedRepo: string | null = await repo.get_local_clone("RampUp"); //get the clone
 
 		//read me calcs
 		if (read_me == null) {
@@ -93,67 +91,13 @@ export class RampUpMetric extends Metric {
 			readmeScore = await readmeCalc(read_me); //calc the readme score
 		}
 
-		//percent lines calc
-		if (clonedRepo == null) {
-			logger.log('info', "No Clone found");
-			commentScore = 0;
-		}
-		else {
-			const percentLines: number = await countCommentToSLOCRatioInRepo(clonedRepo);
-
-			if (percentLines > .5) {
-				commentScore = .5
-			}
-			else if (percentLines > .35) {
-				commentScore = .4
-			}
-			else if (percentLines > .25) {
-				commentScore = .3
-			}
-			else if (percentLines > .15) {
-				commentScore = .2
-			}
-			else {
-				commentScore = 0
-			}
-		}
-
-		total_score = readmeScore + commentScore;
+		total_score = readmeScore;
 		logger.log('info', "Rampup score: " + total_score);
 		return new Promise((resolve) => {
 			resolve(new GroupMetric(repo.url, "RAMP_UP_SCORE", total_score));
 		});
 	}
 }
-
-//Function returns percent of code that is commented
-
-async function countCommentToSLOCRatioInRepo(repoName: string): Promise<number> {
-	return new Promise((resolve, reject) => {
-		try {
-
-			// Get a list of all files in the repository
-			const array_of_files = getAllFiles(repoName, []);
-			let totalComments = 0;
-			let totalSLOC = 0;
-
-			// Iterate over the list of files
-			for (const file of array_of_files) {
-				const fileContent = fs.readFileSync(file, "utf-8");
-				const commentRegex = /\/\/.*|\/\*[\s\S]*?\*\//g;
-				const commentMatches = fileContent.match(commentRegex) || [];
-				totalComments += commentMatches.length;
-				totalSLOC += fileContent.split("\n").filter((line) => line.trim() !== "").length;
-			}
-
-			resolve(totalComments / totalSLOC);
-		} catch (error) {
-			logger.log('error', "reject error in count comments " + error);
-			reject(error);
-		}
-	});
-}
-
 
 async function readmeCalc(filePath: string): Promise<number> {
 	let readmeScore = 0; // subscore for readme
@@ -167,22 +111,22 @@ async function readmeCalc(filePath: string): Promise<number> {
 		//checks readme length and assigns a score based on its length
 		if (stringLength > 0) {
 			if (stringLength > 15000) {
-				readmeScore = .5;
+				readmeScore = 1;
 			}
 			else if (stringLength > 10000) {
-				readmeScore = .4;
+				readmeScore = .8;
 			}
 			else if (stringLength > 7500) {
-				readmeScore = .3;
+				readmeScore = .6;
 			}
 			else if (stringLength > 5000) {
-				readmeScore = .2;
+				readmeScore = .4;
 			}
 			else if (stringLength > 2500) {
-				readmeScore = .1;
+				readmeScore = .2;
 			}
 			else {
-				readmeScore = .05;
+				readmeScore = .1;
 			}
 		}
 		else {
@@ -199,44 +143,24 @@ async function readmeCalc(filePath: string): Promise<number> {
 export class BusFactorMetric extends Metric {
 	async get_metric(repo: Repository): Promise<GroupMetric> {
 		// returns a string filepath to the clone location (directory)
-		const contributions: Contributions = await repo.get_contributors_stats();
+		const contributions: any = await repo.get_contributors_stats();
+		const commits: any = await repo.get_commits()
 		let final_score: NullNum = null;
 
 		// do null checking for every data point
 		// do an empty check for contributors.length == 0
-		if ((contributions == null) || (contributions.total_commits_1yr == null) || (contributions.total_commits_alltime == null)) {
+		if ((contributions == null) || (commits == null)) {
 			logger.log('info', "null check fail in BusFactor" + repo.url);
 			return new Promise((resolve) => {
 				resolve(new GroupMetric(repo.url, "BUS_FACTOR_SCORE", 0));
 			});
 		}
 
-		// Priyanka is fixing to something new that doesn't return negative values
-		// get length of contributors array to see total number of contributors
-		const ratio_contributors_to_commits = contributions.contributors.length / contributions.total_commits_alltime;
-		// ratio of commits in the last year compared to all time
-		let ratio_commits_score = 0;
-		const ratio_commits = contributions.total_commits_1yr / contributions.total_commits_alltime;
-		if (ratio_commits > 1) {
-			// not possible most likely unless theres an error w/graphql fetches
-			ratio_commits_score = 0;
-		}
-		// for ratios that are from .1 to 1 the resulting score will be from .4 to 1
-		else if ((ratio_commits >= 0.1) && (ratio_commits <= 1)) {
-			ratio_commits_score = .4 + (.6 * ratio_commits);
-		}
-		// for ratios that are from .01 to .1 the resulting score will be from .2 to 4
-		else if ((ratio_commits >= 0.01) && (ratio_commits <= 0.1)) {
-			ratio_commits_score = .2 + (.2 * ratio_commits * 10);
-		}
-		// for ratios that are from .001 to .01 the resulting score will be from 0 to .2
-		else if ((ratio_commits >= 0.001) && (ratio_commits <= 0.01)) {
-			ratio_commits_score = (.2 * (ratio_commits * 100));
-		}
-		else {
-			ratio_commits_score = 0;
-		}
-		final_score = (ratio_commits_score * 0.8) + (ratio_contributors_to_commits * 0.2);
+		const contributorsCount = contributions.length;
+		const commitsCount = commits.length;
+		const score = contributorsCount / commitsCount;
+		final_score = score > 1 ? 1 : score;
+
 		return new Promise((resolve) => {
 			resolve(new GroupMetric(repo.url, "BUS_FACTOR_SCORE", final_score));
 		});
