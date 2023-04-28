@@ -113,7 +113,7 @@ async function extractFromZip(content: string): Promise<PkgData> {
     await decompressBase64Zip(content, workDir);
     const metadata = await extractPkgMetadata(workDir);
     removeWorkDir(workDir);
-
+    logger.log('info', 'Extracted from zip.');
     return {
         metadata: metadata,
         content: content
@@ -126,7 +126,7 @@ async function extractFromRepo(url: string): Promise<PkgData> {
     const metadata = await extractPkgMetadata(workDir);
     const content = await createZip(workDir);
     removeWorkDir(workDir);
-
+    logger.log('info', 'Extracted from repo.');
     return {
         metadata: metadata,
         content: content
@@ -134,6 +134,7 @@ async function extractFromRepo(url: string): Promise<PkgData> {
 }
 
 async function gcpUpload(filename: string, base64File: string) {
+    logger.log('info', 'Uploading to GCP...');
     const fileContent = Buffer.from(base64File, 'base64');
 
     const bucket = gcpStorage.bucket(PACKAGE_STORAGE_BUCKET)
@@ -149,9 +150,11 @@ async function gcpUpload(filename: string, base64File: string) {
         stream.on('finish', resolve);
         stream.end(fileContent);
     });
+    logger.log('info', 'Package uploaded.');
 }
 
 async function gcpDownload(filename: string): Promise<string> {
+    logger.log('info', 'Downloading from GCP...');
     const workDir = createWorkDir();
     const bucket = await gcpStorage.bucket(PACKAGE_STORAGE_BUCKET);
     const file = await bucket.file(filename);
@@ -159,6 +162,7 @@ async function gcpDownload(filename: string): Promise<string> {
     await file.download({ destination: filePath });
     const contents = await readFile(filePath, {encoding: 'base64'});
     removeWorkDir(workDir);
+    logger.log('info', 'Package downloaded.');
 
     return contents;
 }

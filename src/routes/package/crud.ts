@@ -34,6 +34,7 @@ router.post('/', async (req: Request, res: Response) => {
                 logger.log('info', 'Package disqualified by metrics.');
                 return;
             }
+            logger.log('info', 'Package package passed metrics.');
 
             pkgData = await packages.extractFromRepo(url);
         }
@@ -64,7 +65,9 @@ router.post('/', async (req: Request, res: Response) => {
 
         // Upload to GCP Cloud Storage
         const filename = packages.createPkgFilename(metadata.name, metadata.version);
+        
         await packages.gcpUpload(filename, content);
+        logger.log('info', 'Package disqualified by metrics.');
                 
         // Create Package
         const pkg = await prisma.package.create({
@@ -75,6 +78,7 @@ router.post('/', async (req: Request, res: Response) => {
                 readme: metadata.readme.substring(0, 65535)
             }
         });
+        logger.log('info', 'Database entry created.');
                 
         // Return package back to user
         res.status(201).send({
@@ -87,7 +91,7 @@ router.post('/', async (req: Request, res: Response) => {
                 Version: pkg.version
             }
         });
-        logger.log('info', 'Package uploaded.');
+        logger.log('info', 'Package succesfully ingested.');
     } catch (e) {
         logger.log('error', e)
         res.status(400).end();
