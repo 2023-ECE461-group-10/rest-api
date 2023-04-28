@@ -10,6 +10,7 @@ const router = express.Router();
 router.post('/', async (req: Request, res: Response) => {
     const content = req.body['Content'];
     const url = req.body['URL'];
+    logger.log('info', 'Ingesting package...');
 
     if (content && url) {
         res.status(400).end();
@@ -33,6 +34,7 @@ router.post('/', async (req: Request, res: Response) => {
                 rating.PullRequest < 0.5 ||
                 rating.NetScore < 0.5) {
                 res.status(424).end();
+                logger.log('info', 'Package disqualified by metrics.');
                 return;
             }
 
@@ -40,6 +42,7 @@ router.post('/', async (req: Request, res: Response) => {
         }
         else {
             res.status(400).end();
+            logger.log('info', 'Missing necessary data.');
             return;
         }
 
@@ -51,12 +54,14 @@ router.post('/', async (req: Request, res: Response) => {
             !metadata.url ||
             !metadata.readme ) {
             res.status(400).end();
+            logger.log('info', 'Missing necessary data.');
             return;
         }
 
         // Check if the package already exists
         if (await pkgModelUtils.checkPkgExists(metadata.name, metadata.version)) {
             res.status(409).end();
+            logger.log('info', 'Package already exists.');
             return;
         }
 
@@ -85,13 +90,15 @@ router.post('/', async (req: Request, res: Response) => {
                 Version: pkg.version
             }
         });
+        logger.log('info', 'Package uploaded.');
     } catch (e) {
-        console.log(e);
+        logger.log('error', e)
         res.status(400).end();
     }
 });
 
 router.get('/:id', async (req: Request, res: Response) => {
+    logger.log('info', 'Getting package...');
     const pkg = await prisma.package.findFirst({
         where: {
             id: parseInt(req.params.id)
@@ -100,6 +107,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
     if (!pkg) {
         res.status(404).end();
+        logger.log('info', 'Package not found.');
         return;
     }
     
@@ -114,6 +122,7 @@ router.get('/:id', async (req: Request, res: Response) => {
             Version: pkg.version
         }
     });
+    logger.log('info', 'Package found.');
 });
 
 router.put('/:id', async (req: Request, res: Response) => {
@@ -121,7 +130,10 @@ router.put('/:id', async (req: Request, res: Response) => {
     const metadata: api.PackageMetadata = apiPkg.metadata;
     const data: api.PackageData = apiPkg.data;
 
+    logger.log('info', 'Updating package...');
+
     if (!data.Content) {
+        logger.log('info', 'No package provided.');
         res.status(400).end();
         return;
     }
@@ -134,12 +146,14 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     if (!pkg) {
         res.status(404).end();
+        logger.log('info', 'Package not found.');
         return;
     }
 
     // Check name and version in db matches the name and version in the request
     if (pkg.name != metadata.Name || pkg.version != metadata.Version) {
         res.status(404).end();
+        logger.log('info', 'Package not found.');
         return;
     }
 
@@ -148,9 +162,11 @@ router.put('/:id', async (req: Request, res: Response) => {
     await packages.gcpUpload(filename, data.Content);
 
     res.status(200).end();
+    logger.log('info', 'Package updated.');
 });
 
 router.delete('/:id', async (req: Request, res: Response) => {
+    logger.log('info', 'Deleting package...');
     const pkg = await prisma.package.delete({
         where: {
             id: parseInt(req.params.id)
@@ -159,24 +175,31 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
     if (!pkg) {
         res.status(404).end();
+        logger.log('info', 'Package not found.');
         return;
     }
 
     const filename = packages.createPkgFilename(pkg.name, pkg.version);
     await packages.gcpDelete(filename);
     res.status(200).end();
+    logger.log('info', 'Package deleted.');
 });
 
 router.delete('/byName/:name', async (req: Request, res: Response) => {
     if (req.params.name == '*') {
+        logger.log('info', 'Deleting all packages...');
         if (!req.authTokenData.isAdmin) {
             res.status(400).end();
+            logger.log('info', 'Not authorized.');
             return;
         }
         await prisma.package.deleteMany();
         res.status(200).end();
+        logger.log('info', 'All packages deleted.');
         return;
     }
+
+    logger.log('info', 'Deleting package by name...');
 
     const pkgs = await prisma.package.deleteMany({ 
         where: {
@@ -187,6 +210,7 @@ router.delete('/byName/:name', async (req: Request, res: Response) => {
     // Won't delete them from gcp
 
     res.status(pkgs ? 200 : 404).end();
+    logger.log('info', 'Package deleted.');
 });
 
 export = router;
