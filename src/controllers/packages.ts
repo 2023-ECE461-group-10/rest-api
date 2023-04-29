@@ -91,6 +91,12 @@ async function createZip(dir: string): Promise<string> {
 }
 
 async function extractPkgMetadata(pkgDir: string): Promise<PkgMetadata> {
+    const entries = fs.readdirSync(pkgDir, { withFileTypes: true });
+    if (entries.length == 1 && entries[0].isDirectory()) {
+        const topLevelFolder = entries[0].name;
+        pkgDir = path.join(pkgDir, topLevelFolder);
+    }
+
     const pkgJSONPath = path.join(pkgDir, 'package.json');
     const pkgJSONStr = await readFile(pkgJSONPath, {encoding: 'utf8'});
     const pkgJSON: PkgJSON = JSON.parse(pkgJSONStr);
