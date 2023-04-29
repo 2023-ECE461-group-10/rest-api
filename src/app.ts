@@ -19,6 +19,7 @@ const app = express();
 app.use(express.json({ limit: '1gb' }));
 app.use(express.text());
 app.use(express.urlencoded({extended: false}));
+app.use(LogRequestBody);
 
 // OPEN API SCHEMA VALIDATION
 app.use(OpenAPIValidator.middleware(config.openAPIValidatorOpts));
@@ -28,7 +29,6 @@ app.use('/authenticate', AuthenticateRoute);
 
 // API ROUTES (AUTH REQUIRED)
 app.use(AuthMiddleware);
-app.use(LogRequestBody);
 app.use('/package', PackageRoute);
 app.use('/packages', PackagesRoute);
 app.use('/reset', ResetRoute);
