@@ -13,7 +13,8 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     const name = req.body[0].Name;
-    const offset = parseInt(req.query['offset'].toString()) || 0;
+    const offsetQParam = req.query['offset'];
+    const offset = offsetQParam ? parseInt(offsetQParam.toString()) : 0;
 
     logger.log('info', 'Getting packages from registry...');
 

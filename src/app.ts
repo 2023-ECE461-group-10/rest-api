@@ -12,6 +12,7 @@ import ResetRoute from './routes/reset';
 
 import { OpenAPIErrorHandler } from './middleware/error';
 import { AuthMiddleware } from './middleware/auth';
+import { LogRequestBody } from './middleware/log';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/authenticate', AuthenticateRoute);
 
 // API ROUTES (AUTH REQUIRED)
 app.use(AuthMiddleware);
+app.use(LogRequestBody);
 app.use('/package', PackageRoute);
 app.use('/packages', PackagesRoute);
 app.use('/reset', ResetRoute);
