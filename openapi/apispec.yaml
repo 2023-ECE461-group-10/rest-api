@@ -607,7 +607,7 @@ components:
           type: string
     PackageID:
       description: ""
-      type: string
+      type: number
     PackageRating:
       description: |-
         Package rating (cf. Project 1).
