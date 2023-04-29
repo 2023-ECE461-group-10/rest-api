@@ -12,12 +12,14 @@ import ResetRoute from './routes/reset';
 
 import { OpenAPIErrorHandler } from './middleware/error';
 import { AuthMiddleware } from './middleware/auth';
+import { LogRequestBody } from './middleware/log';
 
 const app = express();
 
 app.use(express.json({ limit: '1gb' }));
 app.use(express.text());
 app.use(express.urlencoded({extended: false}));
+app.use(LogRequestBody);
 
 // OPEN API SCHEMA VALIDATION
 app.use(OpenAPIValidator.middleware(config.openAPIValidatorOpts));

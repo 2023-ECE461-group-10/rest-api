@@ -8,13 +8,13 @@ import { cloneRepo } from './git';
 import AdmZip from 'adm-zip';
 
 type PkgJSON = {
-    name: string,
-    version: string,
-    repository: {
-        url: string
+    name?: string,
+    version?: string,
+    repository?: {
+        url?: string
     },
-    homepage: {
-        url: string
+    homepage?: {
+        url?: string
     }
 }
 
@@ -24,10 +24,10 @@ type PkgData = {
 };
 
 type PkgMetadata = {
-    name: string,
-    version: string,
-    url: string,
-    readme: string
+    name?: string,
+    version?: string,
+    url?: string,
+    readme?: string
 }
 
 const PARENT_DIR = process.env.WORK_DIR_PARENT;
@@ -94,14 +94,24 @@ async function extractPkgMetadata(pkgDir: string): Promise<PkgMetadata> {
     const pkgJSONPath = path.join(pkgDir, 'package.json');
     const pkgJSONStr = await readFile(pkgJSONPath, {encoding: 'utf8'});
     const pkgJSON: PkgJSON = JSON.parse(pkgJSONStr);
+
     const name = pkgJSON.name;
+    logger.log('info', 'Pkg name is ' + name);
+
     const version = pkgJSON.version;
-    const parsed = parse(pkgJSON.repository.url || pkgJSON.homepage.url);
-    const url = `https://github.com/${parsed.repository}`;
+    logger.log('info', 'Pkg version is ' + version);
+
+    const parsedGitURL = parse(pkgJSON.repository?.url || pkgJSON.homepage?.url);
+    let url;
+    if (parsedGitURL) {
+        url = `https://github.com/${parsedGitURL.repository}`;
+    }
+    logger.log('info', 'Pkg url is ' + url);
     
     const readmePath = path.join(pkgDir, findReadme(pkgDir));
-    let readme = '';
+    let readme;
     if (readmePath) {
+        logger.log('info', 'Pkg has a readme');
         readme = await readFile(readmePath, {encoding: 'utf8'});
     }
 
@@ -124,6 +134,7 @@ async function extractFromRepo(url: string): Promise<PkgData> {
     const workDir = createWorkDir();
     await cloneRepo(url, workDir);
     const metadata = await extractPkgMetadata(workDir);
+    metadata.url = metadata.url || url;
     const content = await createZip(workDir);
     removeWorkDir(workDir);
     logger.log('info', 'Extracted from repo.');

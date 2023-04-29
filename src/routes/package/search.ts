@@ -12,7 +12,7 @@ router.post('/byRegEx', async (req: Request, res: Response) => {
     const pkgs = await prisma
     .$queryRaw<Package[]>`SELECT * FROM Package WHERE name REGEXP ${regex} OR readme REGEXP ${regex};`;
 
-    if (!pkgs) {
+    if (pkgs.length == 0) {
         res.status(404).end();
         logger.log('info', 'Package not found.');
         return;

@@ -12,6 +12,7 @@ router.post('/', async (req: Request, res: Response) => {
     const url = req.body['URL'];
     logger.log('info', 'Ingesting package...');
 
+    // Cannot specify both content and url
     if (content && url) {
         res.status(400).end();
         return;
@@ -49,8 +50,7 @@ router.post('/', async (req: Request, res: Response) => {
         // Check all necessary data existed in the package
         if (!metadata.name || 
             !metadata.version || 
-            !metadata.url ||
-            !metadata.readme ) {
+            !metadata.url) {
             res.status(400).end();
             logger.log('info', 'Missing necessary data.');
             return;
@@ -66,8 +66,7 @@ router.post('/', async (req: Request, res: Response) => {
         // Upload to GCP Cloud Storage
         const filename = packages.createPkgFilename(metadata.name, metadata.version);
         
-        await packages.gcpUpload(filename, content);
-        logger.log('info', 'Package disqualified by metrics.');
+        await packages.gcpUpload(filename, pkgData.content);
                 
         // Create Package
         const pkg = await prisma.package.create({
@@ -75,7 +74,7 @@ router.post('/', async (req: Request, res: Response) => {
                 name: metadata.name,
                 version: metadata.version,
                 url: metadata.url,
-                readme: metadata.readme.substring(0, 65535)
+                readme: metadata.readme?.substring(0, 65535) || ''
             }
         });
         logger.log('info', 'Database entry created.');
@@ -83,7 +82,7 @@ router.post('/', async (req: Request, res: Response) => {
         // Return package back to user
         res.status(201).send({
             data: {
-                Content: content
+                Content: pkgData.content
             },
             metadata: {
                 ID: pkg.id.toString(),
@@ -203,19 +202,19 @@ router.delete('/byName/:name', async (req: Request, res: Response) => {
 
     logger.log('info', 'Deleting package by name...');
 
-    try { 
-        await prisma.package.deleteMany({ 
-            where: {
-                name: req.params.name
-            }
-        });
-    } catch (e) {
+    const pkgs = await prisma.package.deleteMany({ 
+        where: {
+            name: req.params.name
+        }
+     });
+    
+     if (pkgs.count == 0) {
         res.status(404).end();
-        logger.log('info', 'No packages to deleted');
+        logger.log('info', 'No packages to delete');
         return;
     }
 
-    // Won't delete them from gcp
+    // Won't delete them from cloud storage bucket
     
     logger.log('info', 'Packages deleted.');
     res.status(200).end();

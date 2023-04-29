@@ -2,7 +2,7 @@
 openapi: 3.0.2
 info:
   title: ECE 461 - Spring 2023 - Project 2
-  version: 2.3.1
+  version: 2.3.5
   description: "API for ECE 461/Spring 2023/Project 2: A Trustworthy Module Registry"
   termsOfService: http://swagger.io/terms/
   contact:
@@ -347,8 +347,7 @@ paths:
                     name: ece30861defaultadminuser
                     isAdmin: true
                   Secret:
-                    password: correcthorsebatterystaple123(!__+@**(A’”`;DROP TABLE
-                      packages;
+                    password: correcthorsebatterystaple123(!__+@**(A'"`;DROP TABLE packages;
         required: true
       responses:
         "200":
@@ -479,7 +478,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PackageRegEx'
             examples:
-              ExampleRegEx:
+              ExampleRegEx: 
                 value:
                   RegEx: .*?Underscore.*
         required: true
@@ -573,12 +572,15 @@ components:
 
             See https://docs.npmjs.com/cli/v7/configuring-npm/package-json#homepage.
           type: string
+          nullable: true
         URL:
           description: Package URL (for use in public ingest).
           type: string
+          nullable: true
         JSProgram:
           description: A JavaScript program (for use with sensitive modules).
           type: string
+          nullable: true
     User:
       description: ""
       required:
@@ -657,7 +659,7 @@ components:
           type: number
         NetScore:
           format: double
-          description: From Part 1
+          description: Scores calculated from other seven metrics.
           type: number
     PackageHistoryEntry:
       description: One entry of the history of this package.
