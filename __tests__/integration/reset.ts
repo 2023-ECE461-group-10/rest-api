@@ -24,8 +24,6 @@ beforeAll(async() => {
         isAdmin: config.defaultUserCreateCmd.isAdmin
     });
 
-    console.log(adminToken);
-
     nonAdminToken = await generateAccessToken({
         username: nonAdminCreateCmds[0].username,
         isAdmin: nonAdminCreateCmds[0].isAdmin
