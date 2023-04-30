@@ -237,7 +237,7 @@ export class CorrectnessMetric extends Metric {
 					line_count_success += result.source.split("\n").length - 1;
 				}
 				else {
-					logger.log('debug', 'In ESLint parsing: SOURCE UNDEFINED');
+					//logger.log('debug', 'In ESLint parsing: SOURCE UNDEFINED');
 				}
 				file_count_success++;
 				error_count_success += result.errorCount;
