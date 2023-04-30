@@ -9,8 +9,8 @@ import { ValidateParamIsNumberElse } from '../../middleware/validation';
 const router = express.Router();
 
 router.post('/', async (req: Request, res: Response) => {
-    const content = req.body['Content'];
-    const url = req.body['URL'];
+    const content = req.body.Content;
+    const url = req.body.URL;
 
     // Check that Content XOR URL is specified
     if (!content && !url) {
@@ -127,9 +127,8 @@ async (req: Request, res: Response) => {
 router.put('/:id', ValidateParamIsNumberElse('id', 404),
 async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const apiPkg: api.Package = req.body['Package'];
-    const metadata: api.PackageMetadata = apiPkg.metadata;
-    const data: api.PackageData = apiPkg.data;
+    const metadata: api.PackageMetadata = req.body.metadata;
+    const data: api.PackageData = req.body.data;
 
     // Check that Content XOR URL is specified
     const content = data.Content;
