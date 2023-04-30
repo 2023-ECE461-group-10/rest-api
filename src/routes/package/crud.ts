@@ -1,29 +1,36 @@
 import express from 'express';
 import { Request, Response } from 'express';
-import * as packages from '../../controllers/packages';
+import * as packages from '../../services/packages';
 import { prisma, pkgModelUtils } from '../../clients';
 import * as api from '../../types/api'; 
 import { process_urls, calc_final_result, OutputObject } from '../../package-metrics/src/index';
+import { ValidateParamIsNumberElse } from '../../middleware/validation';
 
 const router = express.Router();
 
 router.post('/', async (req: Request, res: Response) => {
     const content = req.body['Content'];
     const url = req.body['URL'];
-    logger.log('info', 'Ingesting package...');
 
-    // Cannot specify both content and url
-    if (content && url) {
+    // Check that Content XOR URL is specified
+    if (!content && !url) {
+        logger.log('info', 'Missing content or url.');
+        res.status(400).end();
+        return;
+    }
+    else if (content && url) {
+        logger.log('info', 'Cannot have both content and url');
         res.status(400).end();
         return;
     }
 
     try {
+        logger.log('info', 'Ingesting package...');
         let pkgData: packages.PkgData;
         if (content) {
             pkgData = await packages.extractFromZip(content);
         }
-        else if (url) {
+        else {
             const rating: OutputObject = (await process_urls([url], calc_final_result))[0];
             
             if (rating.BusFactor < 0.5 ||
@@ -38,11 +45,6 @@ router.post('/', async (req: Request, res: Response) => {
             logger.log('info', 'Package package passed metrics.');
 
             pkgData = await packages.extractFromRepo(url);
-        }
-        else {
-            res.status(400).end();
-            logger.log('info', 'Missing necessary data.');
-            return;
         }
 
         const metadata = pkgData.metadata;
@@ -65,7 +67,6 @@ router.post('/', async (req: Request, res: Response) => {
 
         // Upload to GCP Cloud Storage
         const filename = packages.createPkgFilename(metadata.name, metadata.version);
-        
         await packages.gcpUpload(filename, pkgData.content);
                 
         // Create Package
@@ -97,24 +98,22 @@ router.post('/', async (req: Request, res: Response) => {
     }
 });
 
-router.get('/:id', async (req: Request, res: Response) => {
-    logger.log('info', 'Getting package...');
-    const pkg = await prisma.package.findFirst({
-        where: {
-            id: parseInt(req.params.id)
-        }
-    });
-
+router.get('/:id', ValidateParamIsNumberElse('id', 404),
+async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    const pkg = await prisma.package.findFirst({where: {id}});
     if (!pkg) {
         res.status(404).end();
         logger.log('info', 'Package not found.');
         return;
     }
     
+    logger.log('info', 'Getting package...');
     const filename = packages.createPkgFilename(pkg.name, pkg.version);
+    const content = await packages.gcpDownload(filename);
     res.status(200).send({
         data: {
-            Content: await packages.gcpDownload(filename)
+            Content: content
         },
         metadata: {
             ID: pkg.id.toString(),
@@ -125,65 +124,85 @@ router.get('/:id', async (req: Request, res: Response) => {
     logger.log('info', 'Package found.');
 });
 
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', ValidateParamIsNumberElse('id', 404),
+async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
     const apiPkg: api.Package = req.body['Package'];
     const metadata: api.PackageMetadata = apiPkg.metadata;
     const data: api.PackageData = apiPkg.data;
 
-    logger.log('info', 'Updating package...');
-
-    if (!data.Content) {
-        logger.log('info', 'No package provided.');
+    // Check that Content XOR URL is specified
+    const content = data.Content;
+    const url = data.URL;
+    if (!content && !url) {
+        logger.log('info', 'Missing content or url.');
+        res.status(400).end();
+        return;
+    }
+    else if (content && url) {
+        logger.log('info', 'Cannot have both content and url');
         res.status(400).end();
         return;
     }
 
-    const pkg = await prisma.package.findFirst({
-        where: {
-            id: parseInt(req.params.id)
-        }
-    });
-
-    if (!pkg) {
+    // Check that a package with this id exists
+    if (!(await prisma.package.findFirst({where:{id}}))) {
         res.status(404).end();
         logger.log('info', 'Package not found.');
         return;
     }
 
-    // Check name and version in db matches the name and version in the request
-    if (pkg.name != metadata.Name || pkg.version != metadata.Version) {
-        res.status(404).end();
-        logger.log('info', 'Package not found.');
-        return;
+    try {
+        logger.log('info', 'Updating package...');
+        const pkgData = content ? await packages.extractFromZip(content) :
+                                  await packages.extractFromRepo(url);
+    
+        // Upload to GCP
+        logger.log('info', 'Uploading to GCP');
+        const filename = packages.createPkgFilename(metadata.Name, metadata.Version);
+        await packages.gcpUpload(filename, data.Content);
+        logger.log('info', 'Uploaded to GCP');
+
+        logger.log('info', "Updating database entry");
+        await prisma.package.update({
+            where: {id},
+            data: { 
+                name: metadata.Name,
+                version: metadata.Version,
+                url: pkgData.metadata.url,
+                readme: pkgData.metadata.readme?.substring(0, 65535) || ''
+            }
+        });
+        logger.log('info', 'Database entry updated.');
+
+        res.status(200).end();
+        logger.log('info', 'Package updated.');
+    } catch (e) {
+        res.status(400).end();
+        logger.log('info', 'Failed to update package');
     }
-
-    // upload to gcp
-    const filename = packages.createPkgFilename(pkg.name, pkg.version);
-    await packages.gcpUpload(filename, data.Content);
-
-    res.status(200).end();
-    logger.log('info', 'Package updated.');
 });
 
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', ValidateParamIsNumberElse('id', 404),
+async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+
     logger.log('info', 'Deleting package...');
     let pkg;
     try {
-        pkg = await prisma.package.delete({
-            where: {
-                id: parseInt(req.params.id)
-            }
-        });
+        pkg = await prisma.package.delete({where:{id}});
     } catch (e) {
         res.status(404).end();
         logger.log('info', 'Package not found.');
         return;
     }
+    logger.log('info', 'Package deleted.');
 
+    // Delete from GCP
     const filename = packages.createPkgFilename(pkg.name, pkg.version);
     await packages.gcpDelete(filename);
+
     res.status(200).end();
-    logger.log('info', 'Package deleted.');
 });
 
 router.delete('/byName/:name', async (req: Request, res: Response) => {

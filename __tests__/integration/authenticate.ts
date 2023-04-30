@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { PrismaClient } from '@prisma/client';
-import { verifyAccessToken } from '../../src/controllers/auth';
+import { verifyAccessToken } from '../../src/services/auth';
 import { app } from '../../src/app';
 import { User, UserAuthenticationInfo } from '../../src/types/api';
 import * as supertest from 'supertest';
