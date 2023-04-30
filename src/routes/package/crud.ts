@@ -156,6 +156,12 @@ async (req: Request, res: Response) => {
         logger.log('info', 'Updating package...');
         const pkgData = content ? await packages.extractFromZip(content) :
                                   await packages.extractFromRepo(url);
+
+        if (!pkgData.metadata.url) {
+            res.status(400).end();
+            logger.log('info', 'Missing url in package');
+            return;
+        }
     
         // Upload to GCP
         logger.log('info', 'Uploading to GCP');
