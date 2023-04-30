@@ -12,7 +12,7 @@ async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const pkg = await prisma.package.findUnique({where:{id}});
     if (!pkg) {
-        res.status(404).end();
+        res.status(404).end('Package does not exist.');
         logger.log('info', 'Package not found.');
         return;
     }
@@ -24,7 +24,7 @@ async (req: Request, res: Response) => {
         res.status(200).json(rating[0]);
         logger.log('info', 'Package rated.');
     } catch {
-        res.status(500).end();
+        res.status(500).end('The package rating system choked on at least one of the metrics.');
         logger.log('error', 'Error rating package!');
     }
 });

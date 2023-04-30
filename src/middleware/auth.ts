@@ -7,14 +7,14 @@ async function AuthMiddleware(req: Request, res: Response, next: NextFunction) {
         req.authTokenData = await verifyAccessToken(token);
         next();
     } catch (error) {
-        res.status(400).end();
+        res.status(400).end('Problem verifying token.');
     }
 }
 
 function IfNotAdmin(notAdminStatus: number)  {
     return (req: Request, res: Response, next: NextFunction) => {
         if (!req.authTokenData.isAdmin)
-            res.status(notAdminStatus).end();
+            res.status(notAdminStatus).end('Not authorized.');
         next();
     };
 }
