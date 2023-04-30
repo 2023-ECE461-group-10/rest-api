@@ -165,7 +165,7 @@ async (req: Request, res: Response) => {
         // Upload to GCP
         logger.log('info', 'Uploading to GCP');
         const filename = packages.createPkgFilename(metadata.Name, metadata.Version);
-        await packages.gcpUpload(filename, data.Content);
+        await packages.gcpUpload(filename, pkgData.content);
         logger.log('info', 'Uploaded to GCP');
 
         logger.log('info', "Updating database entry");
