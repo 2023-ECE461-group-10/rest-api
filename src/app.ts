@@ -1,5 +1,6 @@
 import express from 'express';
 import * as OpenAPIValidator from 'express-openapi-validator';
+import cors from 'cors';
 
 import config from './config';
 import logger from './logger';
@@ -16,6 +17,7 @@ import { LogRequestBody } from './middleware/log';
 
 const app = express();
 
+app.use(cors());
 app.use(express.json({ limit: '1gb' }));
 app.use(express.text());
 app.use(express.urlencoded({extended: false}));
