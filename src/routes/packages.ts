@@ -1,13 +1,14 @@
 import express from 'express';
 import { Request, Response } from 'express';
 import { prisma } from '../clients';
+import { isValidNumber } from '../middleware/validation';
 
 const router = express.Router();
 
 const TAKE_LIMIT = 50;
 
 router.post('/', async (req: Request, res: Response) => {
-    if (req.body.length == undefined) {
+    if (!req.body.length) {
         res.status(400).end();
         return;
     }
@@ -15,6 +16,10 @@ router.post('/', async (req: Request, res: Response) => {
     const name = req.body[0].Name;
     const offsetQParam = req.query['offset'];
     const offset = offsetQParam ? parseInt(offsetQParam.toString()) : 0;
+    if (!isValidNumber(offset)) {
+        res.status(400).end("Invalid offset provided");
+        return;
+    }
 
     logger.log('info', 'Getting packages from registry...');
 
