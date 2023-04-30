@@ -15,7 +15,7 @@ router.put('/', async (req: Request, res: Response) => {
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify(token));
     } catch (e) {
-        res.status(401).end();
+        res.status(401).end().send('The user or password is invalid.');
     }
 });
 

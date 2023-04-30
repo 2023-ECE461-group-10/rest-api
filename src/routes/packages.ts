@@ -8,7 +8,7 @@ const TAKE_LIMIT = 50;
 
 router.post('/', async (req: Request, res: Response) => {
     if (req.body.length == undefined) {
-        res.status(400).end();
+        res.status(400).end().send('Missing body.');
         return;
     }
 

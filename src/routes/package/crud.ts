@@ -15,12 +15,12 @@ router.post('/', async (req: Request, res: Response) => {
     // Check that Content XOR URL is specified
     if (!content && !url) {
         logger.log('info', 'Missing content or url.');
-        res.status(400).end();
+        res.status(400).end().send('Missing content or url.');
         return;
     }
     else if (content && url) {
-        logger.log('info', 'Cannot have both content and url');
-        res.status(400).end();
+        logger.log('info', 'Cannot have both content and url.');
+        res.status(400).end().send('Cannot have both content and url.');
         return;
     }
 
@@ -38,7 +38,7 @@ router.post('/', async (req: Request, res: Response) => {
                 rating.RampUp < 0.5 ||
                 rating.ResponsiveMaintainer < 0.5 ||
                 rating.LicenseScore < 0.5) {
-                res.status(424).end();
+                res.status(424).end().send('Package is not uploaded due to the disqualified rating.');
                 logger.log('info', 'Package disqualified by metrics.');
                 return;
             }
@@ -53,14 +53,14 @@ router.post('/', async (req: Request, res: Response) => {
         if (!metadata.name || 
             !metadata.version || 
             !metadata.url) {
-            res.status(400).end();
+            res.status(400).end().send('Missing necessary data.');
             logger.log('info', 'Missing necessary data.');
             return;
         }
 
         // Check if the package already exists
         if (await pkgModelUtils.checkPkgExists(metadata.name, metadata.version)) {
-            res.status(409).end();
+            res.status(409).end().send('Package exists already.');
             logger.log('info', 'Package already exists.');
             return;
         }
@@ -94,7 +94,7 @@ router.post('/', async (req: Request, res: Response) => {
         logger.log('info', 'Package succesfully ingested.');
     } catch (e) {
         logger.log('error', e)
-        res.status(400).end();
+        res.status(400).end().send('Error uploading package.');
     }
 });
 
@@ -103,7 +103,7 @@ async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const pkg = await prisma.package.findFirst({where: {id}});
     if (!pkg) {
-        res.status(404).end();
+        res.status(404).end().send('Package does not exist.');
         logger.log('info', 'Package not found.');
         return;
     }
@@ -134,19 +134,19 @@ async (req: Request, res: Response) => {
     const content = data.Content;
     const url = data.URL;
     if (!content && !url) {
-        logger.log('info', 'Missing content or url.');
-        res.status(400).end();
+        logger.log('info', 'Missing content and url.');
+        res.status(400).end().send('Missing content and url.');
         return;
     }
     else if (content && url) {
         logger.log('info', 'Cannot have both content and url');
-        res.status(400).end();
+        res.status(400).end().send('Cannot have both content and url.');
         return;
     }
 
     // Check that a package with this id exists
     if (!(await prisma.package.findFirst({where:{id}}))) {
-        res.status(404).end();
+        res.status(404).end().send('Package does not exist.');
         logger.log('info', 'Package not found.');
         return;
     }
@@ -157,7 +157,7 @@ async (req: Request, res: Response) => {
                                   await packages.extractFromRepo(url);
 
         if (!pkgData.metadata.url) {
-            res.status(400).end();
+            res.status(400).end().send('No url in package.json.');
             logger.log('info', 'Missing url in package');
             return;
         }
@@ -183,7 +183,7 @@ async (req: Request, res: Response) => {
         res.status(200).end();
         logger.log('info', 'Package updated.');
     } catch (e) {
-        res.status(400).end();
+        res.status(400).end().send('Failed to update package');
         logger.log('info', 'Failed to update package');
     }
 });
@@ -197,7 +197,7 @@ async (req: Request, res: Response) => {
     try {
         pkg = await prisma.package.delete({where:{id}});
     } catch (e) {
-        res.status(404).end();
+        res.status(404).end().send('Package does not exist.');
         logger.log('info', 'Package not found.');
         return;
     }
@@ -214,7 +214,7 @@ router.delete('/byName/:name', async (req: Request, res: Response) => {
     if (req.params.name == '*') {
         logger.log('info', 'Deleting all packages...');
         if (!req.authTokenData.isAdmin) {
-            res.status(400).end();
+            res.status(400).end().send('Not authorized.');
             logger.log('info', 'Not authorized.');
             return;
         }
@@ -233,8 +233,8 @@ router.delete('/byName/:name', async (req: Request, res: Response) => {
      });
     
      if (pkgs.count == 0) {
-        res.status(404).end();
-        logger.log('info', 'No packages to delete');
+        res.status(404).end().send('Package does not exist.');
+        logger.log('info', 'Package does not exist.');
         return;
     }
 

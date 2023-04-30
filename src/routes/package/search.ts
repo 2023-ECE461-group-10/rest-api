@@ -13,7 +13,7 @@ router.post('/byRegEx', async (req: Request, res: Response) => {
     .$queryRaw<Package[]>`SELECT * FROM Package WHERE name REGEXP ${regex} OR readme REGEXP ${regex};`;
 
     if (pkgs.length == 0) {
-        res.status(404).end();
+        res.status(404).end().send('Package does not exist.');
         logger.log('info', 'Package not found.');
         return;
     }
